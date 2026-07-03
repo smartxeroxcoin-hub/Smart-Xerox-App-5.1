@@ -1,0 +1,6 @@
+{
+  "name": "SMART XEROX",
+  "description": "SmartXerox V5.0 ecosystem simulator featuring interactive Customer QR portal with Passport Photo AI, Shop Owner background service, customizable rates, and Admin panel.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
