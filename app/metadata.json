@@ -1,6 +1,6 @@
 {
   "name": "Smart X Point",
-  "description": "Smart X Point - Passport Photo Printing, Smart Xerox, and Online Print Services 24/7",
+  "description": "Smart X Point - Smart Xerox, Print & Photo Services",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

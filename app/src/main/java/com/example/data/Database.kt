@@ -23,9 +23,24 @@ data class ServiceRate(
 @Entity(tableName = "admin_settings")
 data class AdminSettings(
     @PrimaryKey val id: Int = 1,
-    val rechargeRate: Double = 5.0, // Commission per print in Rupees
-    val totalCommissionEarned: Double = 0.0,
-    val overrideCustomRates: Boolean = false
+    val rechargeRate: Double = 0.0, // Deprecated commission rate (always 0.0 now)
+    val totalCommissionEarned: Double = 0.0, // Deprecated royalty
+    val overrideCustomRates: Boolean = false,
+    
+    // New fields: Credentials, manual UPI and customizable plan prices
+    val adminUsername: String = "admin",
+    val adminPassword: String = "admin123",
+    val adminUpiId: String = "admin@upi",
+    val plan1MonthPrice: Double = 299.0,
+    val plan3MonthPrice: Double = 849.0,
+    val plan6MonthPrice: Double = 1649.0,
+    val plan12MonthPrice: Double = 3149.0,
+    val customLogoUri: String? = null,
+    val cloudApiEndpoint: String = "https://api.smartxerox.co.in",
+    val cloudDomain: String = "smartxerox.co.in",
+    val hostingPlatform: String = "Firebase Hosting / Vercel",
+    val sslEnabled: Boolean = true,
+    val webhookUrl: String = "https://webhook.smartxerox.co.in/notify"
 )
 
 @Entity(tableName = "print_orders")
@@ -76,9 +91,16 @@ data class RechargePack(
 @Entity(tableName = "owner_credits")
 data class OwnerCredits(
     @PrimaryKey val id: Int = 1,
-    val balance: Int = 100,
-    val subscriptionStatus: String = "ACTIVE",
-    val subscriptionExpires: Long = 0
+    val balance: Int = 100, // Deprecated balance
+    val subscriptionStatus: String = "ACTIVE", // ACTIVE or EXPIRED
+    val subscriptionExpires: Long = 0, // Expiry timestamp
+    
+    // New fields: Registration, custom UPI and custom login credentials
+    val isRegistered: Boolean = false,
+    val registrationDate: Long = 0,
+    val ownerUpi: String = "owner@upi",
+    val ownerUsername: String = "owner",
+    val ownerPassword: String = "owner123"
 )
 
 @Entity(tableName = "transactions")
@@ -119,6 +141,9 @@ interface SmartXeroxDao {
     // Print Orders
     @Query("SELECT * FROM print_orders ORDER BY timestamp DESC")
     fun getAllOrders(): Flow<List<PrintOrder>>
+
+    @Query("SELECT * FROM print_orders ORDER BY timestamp DESC")
+    suspend fun getAllOrdersDirect(): List<PrintOrder>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertOrder(order: PrintOrder)
@@ -184,7 +209,27 @@ interface SmartXeroxDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTransaction(tx: Transaction)
+
+    // New: Cloud Storage Batches
+    @Query("SELECT * FROM cloud_storage_batches ORDER BY timestamp DESC")
+    fun getAllCloudBatches(): Flow<List<CloudStorageBatch>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertCloudBatch(batch: CloudStorageBatch)
+
+    @Query("DELETE FROM cloud_storage_batches WHERE batchId = :id")
+    suspend fun deleteCloudBatch(id: String)
 }
+
+@Entity(tableName = "cloud_storage_batches")
+data class CloudStorageBatch(
+    @PrimaryKey val batchId: String,
+    val batchName: String,
+    val photoCount: Int,
+    val timestamp: Long = System.currentTimeMillis(),
+    val cloudUrl: String,
+    val fileSizeKb: Int = 1240
+)
 
 @Database(
     entities = [
@@ -195,9 +240,10 @@ interface SmartXeroxDao {
         Printer::class,
         RechargePack::class,
         OwnerCredits::class,
-        Transaction::class
+        Transaction::class,
+        CloudStorageBatch::class
     ],
-    version = 2,
+    version = 4,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {

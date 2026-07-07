@@ -1,0 +1,252 @@
+app/src/main/java/com/example/MainActivity.kt:677: Text("प्रिंट आणि सेवा (Services & Print)", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+app/src/main/java/com/example/MainActivity.kt:691: Text("थेट पेमेंट QR (UPI Portal)", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+app/src/main/java/com/example/MainActivity.kt:750: text = if (isShopConnectedQR) "दुकान जोडलेली आहे! (Shop Linked)" else "दुकान जोडलेले नाही (No Shop Linked)",
+app/src/main/java/com/example/MainActivity.kt:756: text = if (isShopConnectedQR) "Shop ID: OWNER01 (Xerox & Print Active)" else "Xerox/Print साठी दुकानचा QR कोड स्कॅन करा",
+app/src/main/java/com/example/MainActivity.kt:785: text = "दुकानदाराच्या QR कोडकडे कॅमेरा रोखा:",
+app/src/main/java/com/example/MainActivity.kt:821: Text("कॅमेरा काम करत नसेल तर थेट जोडा (Demo Connect)", fontSize = 10.sp, fontWeight = FontWeight.Bold)
+app/src/main/java/com/example/MainActivity.kt:832: text = "सर्व्हिस कॅटेगरी निवडा (Select Category):",
+app/src/main/java/com/example/MainActivity.kt:900: text = "सर्व्हिस निवडा (Choose Service):",
+app/src/main/java/com/example/MainActivity.kt:1030: text = "दुकानदार थेट युपीआय पेमेंट (Direct UPI QR Portal)",
+app/src/main/java/com/example/MainActivity.kt:1038: text = "ग्राहक पेमेंट थेट दुकानदाराच्या खालील युपीआय (UPI) आयडी वर जमा होईल",
+app/src/main/java/com/example/MainActivity.kt:1059: text = "पेमेंट तपशील भरा (Enter Payment Details):",
+app/src/main/java/com/example/MainActivity.kt:1070: label = { Text("दुकानदाराचा UPI ID (Shop UPI ID)", fontSize = 11.sp) },
+app/src/main/java/com/example/MainActivity.kt:1088: label = { Text("पेमेंट रक्कम (Amount in ₹)", fontSize = 11.sp) },
+app/src/main/java/com/example/MainActivity.kt:1117: label = { Text("पेमेंट नोट / रिमार्क (Remark / Note)", fontSize = 11.sp) },
+app/src/main/java/com/example/MainActivity.kt:1139: text = "स्कॅन करून पेमेंट करा (Scan to Pay):",
+app/src/main/java/com/example/MainActivity.kt:1200: Toast.makeText(context, "पेमेंट यशस्वीरित्या सबमिट केले! 🎉", Toast.LENGTH_LONG).show()
+app/src/main/java/com/example/MainActivity.kt:1209: Text("पेमेंट केले (I Have Paid)", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color.White)
+app/src/main/java/com/example/MainActivity.kt:1516: text = "✨ Featured Services (विशेष सेवा)",
+app/src/main/java/com/example/MainActivity.kt:2129: Text(text = "रद्द करा")
+app/src/main/java/com/example/MainActivity.kt:2137: Text(text = "कन्फर्म करा (Confirm)", fontWeight = FontWeight.Bold)
+app/src/main/java/com/example/MainActivity.kt:2177: text = "AI 8-Photos Sheet तयार झाली आहे (कॅटरिंग कट गाईडसह):",
+app/src/main/java/com/example/MainActivity.kt:2264: Text(text = "ऑर्डर डिटेल्स (Bill Details):", color = Color(0xFF475569), fontSize = 11.sp)
+app/src/main/java/com/example/MainActivity.kt:2265: Text(text = "स्मार्टझेरॉक्स V5.0", color = Color(0xFF6750A4), fontWeight = FontWeight.Bold, fontSize = 11.sp)
+app/src/main/java/com/example/MainActivity.kt:2277: text = "✓ 8 कॉपीज् (4\"x6\" प्रिमियम ग्लॉसी Paper वर)",
+app/src/main/java/com/example/MainActivity.kt:2299: Text("फिरवा (Rotate 90°)", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+app/src/main/java/com/example/MainActivity.kt:2309: Text("प्रिंट प्रीव्ह्यू (Print Preview)", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+app/src/main/java/com/example/MainActivity.kt:2330: text = "₹${selectedService?.rate?.toInt() ?: 30} पे करून प्रिंट करा (Pay & Print)",
+app/src/main/java/com/example/MainActivity.kt:2461: text = if (isFileUploaded) "File Selected & Ready! 📄" else "डॉक्युमेंट फाईल अपलोड करा (Click to Select File)",
+app/src/main/java/com/example/MainActivity.kt:2525: Text(text = "प्रिंट सेटिंग्ज (Print Settings):", color = Color(0xFF6750A4), fontWeight = FontWeight.Bold, fontSize = 12.sp)
+app/src/main/java/com/example/MainActivity.kt:2534: Text(text = "प्रती (Copies):", color = Color(0xFF0F172A), fontSize = 13.sp, fontWeight = FontWeight.Medium)
+app/src/main/java/com/example/MainActivity.kt:2568: Text(text = "पेज रेंज (Page Range):", color = Color(0xFF0F172A), fontSize = 13.sp, fontWeight = FontWeight.Medium)
+app/src/main/java/com/example/MainActivity.kt:2598: Text(text = "दोन्ही बाजूने प्रिंट (Double-Sided):", color = Color(0xFF0F172A), fontSize = 13.sp, fontWeight = FontWeight.Medium)
+app/src/main/java/com/example/MainActivity.kt:2622: Text("प्रिंट प्रीव्ह्यू तपासा (Show Print Preview)", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+app/src/main/java/com/example/MainActivity.kt:2650: text = "₹${totalPrice.toInt()} पे आणि प्रिंट करा (Pay & Print)",
+app/src/main/java/com/example/MainActivity.kt:2718: text = "एकूण रक्कम (Total Price):",
+app/src/main/java/com/example/MainActivity.kt:2750: text = "पैसे थेट दुकानदाराच्या खात्यात जमा होतील",
+app/src/main/java/com/example/MainActivity.kt:2763: text = "पेमेंट व्हेरीफाय होत आहे... (Verifying Payment)",
+app/src/main/java/com/example/MainActivity.kt:2770: text = "UPI ॲप निवडा:",
+app/src/main/java/com/example/MainActivity.kt:2794: text = "$appName द्वारे पेमेंट करा",
+app/src/main/java/com/example/MainActivity.kt:2804: text = "🔒 पेमेंट होताच डायरेक्ट दुकानदाराच्या खात्यात पैसे जमा होतील. स्मार्टझेरॉक्स कोणतीही फी अटकावून ठेवत नाही.",
+app/src/main/java/com/example/MainActivity.kt:2884: text = if (isExpired) "⚠️ सबस्क्रिप्शन संपले आहे! (Subscription Expired)" else "⚠️ सबस्क्रिप्शन लवकरच संपत आहे! (Expiring Soon)",
+app/src/main/java/com/example/MainActivity.kt:2892: "तुमची अनलिमिटेड प्रिंट सेवा बंद झाली आहे. कृपया त्वरित रिचार्ज करा."
+app/src/main/java/com/example/MainActivity.kt:2894: "तुमचे सबस्क्रिप्शन $daysRemaining दिवसांत संपणार आहे. कृपया त्वरित रिचार्ज करा जेणेकरून खंड पडणार नाही.",
+app/src/main/java/com/example/MainActivity.kt:2910: Text("रिचार्ज", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color.White)
+app/src/main/java/com/example/MainActivity.kt:2948: text = if (isServiceRunning) "पुढील हार्टबीट: $nextHeartbeatSeconds सेकंदात" else "Heartbeat Off - Customer can't order",
+app/src/main/java/com/example/MainActivity.kt:3118: text = "🖨️ मल्टिपल प्रिंटर्स (Connected Printers)",
+app/src/main/java/com/example/MainActivity.kt:3124: text = "ऑटो-फॉलबॅक आणि लोड-बॅलन्सिंग सक्रिय आहे",
+app/src/main/java/com/example/MainActivity.kt:3139: Text("नवीन जोडा", fontSize = 10.sp, fontWeight = FontWeight.Bold)
+app/src/main/java/com/example/MainActivity.kt:3147: text = "कोणताही प्रिंटर जोडलेला नाही. कृपया जोडा.",
+app/src/main/java/com/example/MainActivity.kt:3215: "READY" -> "🟢 READY (चालू)"
+app/src/main/java/com/example/MainActivity.kt:3216: "PAPER_JAM" -> "🟠 PAPER JAM (अडकलेला)"
+app/src/main/java/com/example/MainActivity.kt:3217: "OUT_OF_INK" -> "🟡 OUT OF INK (शाही संपली)"
+app/src/main/java/com/example/MainActivity.kt:3218: else -> "🔴 OFFLINE (बंद)"
+app/src/main/java/com/example/MainActivity.kt:3309: text = "नवीन प्रिंटर जोडा (Add Printer)",
+app/src/main/java/com/example/MainActivity.kt:3319: label = { Text("प्रिंटर नाव (e.g. HP LaserJet)") },
+app/src/main/java/com/example/MainActivity.kt:3334: label = { Text("IP ॲड्रेस (e.g. 192.168.1.100)") },
+app/src/main/java/com/example/MainActivity.kt:3351: Text(text = "मुख्य प्रिंटर बनवा (Primary Printer)", color = Color.White, fontSize = 11.sp)
+app/src/main/java/com/example/MainActivity.kt:3370: Text("रद्द")
+app/src/main/java/com/example/MainActivity.kt:3385: Text("जोडा", fontWeight = FontWeight.Bold)
+app/src/main/java/com/example/MainActivity.kt:3457: text = "📥 रिसीव्हड पुश नोटिफिकेशन्स (FCM Notifications):",
+app/src/main/java/com/example/MainActivity.kt:3562: Text(text = "हार्टबीट पिंग्स सुरू होण्यासाठी वाट पाहत आहे...", color = Color.DarkGray, fontSize = 11.sp)
+app/src/main/java/com/example/MainActivity.kt:3629: text = "सर्व्हिस रेट सेट करा (Shopkeeper Custom Rates):",
+app/src/main/java/com/example/MainActivity.kt:3660: text = "आयडी: ${service.id}",
+app/src/main/java/com/example/MainActivity.kt:3719: text = "रेट बदल करा (Update Rate)",
+app/src/main/java/com/example/MainActivity.kt:3735: label = { Text("रेट (Rupees)") },
+app/src/main/java/com/example/MainActivity.kt:3757: Text("रद्द")
+app/src/main/java/com/example/MainActivity.kt:3767: Text("सेव्ह", fontWeight = FontWeight.Bold)
+app/src/main/java/com/example/MainActivity.kt:3784: text = "📊 अलीकडील ऑर्डर्स (Recent Orders Log):",
+app/src/main/java/com/example/MainActivity.kt:3793: Text(text = "अजून कोणतीही ऑर्डर आलेली नाही.", color = Color.LightGray, fontSize = 11.sp)
+app/src/main/java/com/example/MainActivity.kt:3851: text = "रक्कम: ₹${order.price.toInt()} | रॉयल्टी: ₹${order.commissionPaid.toInt()}",
+app/src/main/java/com/example/MainActivity.kt:3867: text = "⚠️ त्रुटी: ${order.errorMessage}",
+app/src/main/java/com/example/MainActivity.kt:3875: text = "🖨️ प्रिंटेड ऑन: IP ${order.printerUsedIp}",
+app/src/main/java/com/example/MainActivity.kt:3931: text = "दुकान QR कोड (Shop QR Code)",
+app/src/main/java/com/example/MainActivity.kt:3939: text = "खालीलपैकी योग्य पर्याय निवडा. तुम्ही ग्राहकांसाठी ऑर्डर पाठवण्याचा क्यूआर किंवा थेट पेमेंट स्वीकारण्याचा क्यूआर तयार करू शकता.",
+app/src/main/java/com/example/MainActivity.kt:3957: listOf("Ordering" to "📄 ऑर्डर QR (Order QR)", "DirectUPI" to "💳 थेट पेमेंट QR (Direct UPI QR)").forEach { (type, label) ->
+app/src/main/java/com/example/MainActivity.kt:3983: label = { Text("पेमेंट रक्कम (पर्यायी - ₹) [Optional Amount]", color = Color.White, fontSize = 11.sp) },
+app/src/main/java/com/example/MainActivity.kt:3984: placeholder = { Text("उदा. 10, 20, 50") },
+app/src/main/java/com/example/MainActivity.kt:3998: text = "स्कॅन करून थेट तुमच्या युपीआय ID वर पैसे जमा होतील: ${ownerCredits.ownerUpi}",
+app/src/main/java/com/example/MainActivity.kt:4110: text = "QR कोड डाउनलोड करा (Download QR)",
+app/src/main/java/com/example/MainActivity.kt:4138: text = "स्कॅनिंग आणि ४०४ एरर टिप्स (QR Scan Tips)",
+app/src/main/java/com/example/MainActivity.kt:4146: text = "• मोबाईल कॅमेराने स्कॅन केल्यावर थेट 'Smart Xerox' ॲप उघडेल (Deep Linking). \n• जर थेट ॲप उघडत नसेल तर तो browser मध्ये जाईल. Browser मधील 404 Error टाळण्यासाठी आम्ही हा QR कोड अपडेट केला आहे. आता स्कॅन केल्यावर थेट चालू ॲपचे वेब व्ह्यू उघडेल आणि ४०४ (Page Not Found) एरर येणार नाही!",
+app/src/main/java/com/example/MainActivity.kt:4165: text = "💡 हे कसं काम करतं? (How it works):",
+app/src/main/java/com/example/MainActivity.kt:4173: "1️⃣" to "QR कोड डाउनलोड करा आणि कोणत्याही चांगल्या कागदावर प्रिंट करा.",
+app/src/main/java/com/example/MainActivity.kt:4174: "2️⃣" to "दुकानाच्या दर्शनी भागात किंवा काउंटरवर लावा जेणेकरून तो ग्राहकांना सहज दिसेल.",
+app/src/main/java/com/example/MainActivity.kt:4175: "3️⃣" to "ग्राहक त्यांच्या मोबाईल कॅमेऱ्याने हा QR कोड स्कॅन करतील.",
+app/src/main/java/com/example/MainActivity.kt:4176: "4️⃣" to "कोणतेही ॲप इन्स्टॉल न करता ग्राहक थेट सर्व्हिसेस (Xerox, Print, AI Photos) पाहू शकतील व ऑर्डर्स सबमिट करतील!"
+app/src/main/java/com/example/MainActivity.kt:4251: "Overview & Franchise" -> "सांख्यिकी (Stats)"
+app/src/main/java/com/example/MainActivity.kt:4252: "Pricing & Overrides" -> "दर नियंत्रण"
+app/src/main/java/com/example/MainActivity.kt:4253: "Manage Recharge Packs" -> "रिचार्ज पॅक्स"
+app/src/main/java/com/example/MainActivity.kt:4254: "Revenue Records" -> "महसूल (Revenue)"
+app/src/main/java/com/example/MainActivity.kt:4255: "Live QR Orders & Logs" -> "QR लॉग्स"
+app/src/main/java/com/example/MainActivity.kt:4256: "Audit Logs" -> "ऑडिट लॉग्स"
+app/src/main/java/com/example/MainActivity.kt:4283: Text(text = "एकूण पेजेस (Printed)", color = Color.LightGray, fontSize = 9.sp)
+app/src/main/java/com/example/MainActivity.kt:4292: Text(text = "नोंदणी महसूल (Registration Rev)", color = Color.LightGray, fontSize = 9.sp)
+app/src/main/java/com/example/MainActivity.kt:4301: Text(text = "सबस्क्रिप्शन महसूल (Sub Rev)", color = Color.LightGray, fontSize = 9.sp)
+app/src/main/java/com/example/MainActivity.kt:4323: text = "🛠️ अधिकृत डीफॉल्ट दर व्यवस्थापन (Default Admin Rates):",
+app/src/main/java/com/example/MainActivity.kt:4357: text = "वर्ग: ${service.category}",
+app/src/main/java/com/example/MainActivity.kt:4421: text = "⚡ सबस्क्रिप्शन रिचार्ज पॅक्स व मास्टर UPI (Subscription & Master UPI)",
+app/src/main/java/com/example/MainActivity.kt:4427: text = "शॉप ओनर्ससाठी सबस्क्रिप्शन प्लॅन्सचे दर आणि मास्टर UPI आयडी येथे व्यवस्थापित करा:",
+app/src/main/java/com/example/MainActivity.kt:4436: label = { Text("मास्टर UPI आयडी (Master UPI ID)", fontSize = 11.sp) },
+app/src/main/java/com/example/MainActivity.kt:4543: Toast.makeText(context, "दर आणि युपीआय यशस्वीरित्या जतन केले! 🎉", Toast.LENGTH_SHORT).show()
+app/src/main/java/com/example/MainActivity.kt:4549: Text("दर जतन करा (Save Plan Prices)", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+app/src/main/java/com/example/MainActivity.kt:4562: text = "📜 मास्टर व्यवहार इतिहास (Master Transaction History):",
+app/src/main/java/com/example/MainActivity.kt:4571: Text(text = "अद्याप कोणताही व्यवहार झालेला नाही.", color = Color.LightGray, fontSize = 11.sp)
+app/src/main/java/com/example/MainActivity.kt:4591: Text(text = "दुकानदार: OWNER01", fontWeight = FontWeight.Bold, color = Color.White, fontSize = 11.sp)
+app/src/main/java/com/example/MainActivity.kt:4592: Text(text = "आयडी: ${tx.id} | पॅक: ${tx.packName}", color = Color.LightGray, fontSize = 9.sp)
+app/src/main/java/com/example/MainActivity.kt:4631: Text(text = "नोंदणी शुल्क (Registrations)", color = Color.LightGray, fontSize = 8.sp, textAlign = TextAlign.Center)
+app/src/main/java/com/example/MainActivity.kt:4641: Text(text = "रिचार्ज उत्पन्न (Recharges)", color = Color.LightGray, fontSize = 8.sp, textAlign = TextAlign.Center)
+app/src/main/java/com/example/MainActivity.kt:4652: Text(text = "एकूण महसूल (Grand Total)", color = Color(0xFFFFB300), fontSize = 8.sp, textAlign = TextAlign.Center)
+app/src/main/java/com/example/MainActivity.kt:4702: text = "📊 मासिक महसूल वाढ (Monthly Revenue Growth Dashboard)",
+app/src/main/java/com/example/MainActivity.kt:4708: text = "नोंदणी आणि रिचार्ज मधील मासिक वाढीचे प्रदर्शन (Registrations vs Recharges)",
+app/src/main/java/com/example/MainActivity.kt:4807: Text("नोंदणी (Registrations)", color = Color.LightGray, fontSize = 8.sp)
+app/src/main/java/com/example/MainActivity.kt:4817: Text("रिचार्ज (Recharges)", color = Color.LightGray, fontSize = 8.sp)
+app/src/main/java/com/example/MainActivity.kt:4830: "ALL" -> "सर्व (All)"
+app/src/main/java/com/example/MainActivity.kt:4831: "REG" -> "नोंदणी (New Registration)"
+app/src/main/java/com/example/MainActivity.kt:4832: "REC" -> "रिचार्ज (Subscription Recharges)"
+app/src/main/java/com/example/MainActivity.kt:4858: text = "📈 महसूल व्यवहार यादी (Revenue Records List):",
+app/src/main/java/com/example/MainActivity.kt:4873: Text(text = "या फिल्टर अंतर्गत कोणताही व्यवहार आढळला नाही.", color = Color.LightGray, fontSize = 11.sp)
+app/src/main/java/com/example/MainActivity.kt:4925: text = "व्यवहार आयडी (TX ID): ${tx.id}",
+app/src/main/java/com/example/MainActivity.kt:4983: text = "📷 QR पोर्टलवरून आलेल्या ऑर्डर्स (QR Portal Incoming Orders):",
+app/src/main/java/com/example/MainActivity.kt:5002: text = "सध्या कोणतीही QR ऑर्डर प्रलंबित किंवा पूर्ण नाही.",
+app/src/main/java/com/example/MainActivity.kt:5112: text = "📟 रिअल-टाइम ॲक्टिव्हिटी मॉनिटर (Live Server Telemetry):",
+app/src/main/java/com/example/MainActivity.kt:5175: text = "🕵️ ॲडमिन क्रियाकलाप ऑडिट लॉग (Admin Audit Logs):",
+app/src/main/java/com/example/MainActivity.kt:5194: text = "कोणतेही ऑडिट रेकॉर्ड उपलब्ध नाहीत.",
+app/src/main/java/com/example/MainActivity.kt:5258: text = "ग्लोबल रॉयल्टी रेट बदल (Royalty Settings)",
+app/src/main/java/com/example/MainActivity.kt:5268: label = { Text("कंपनी रॉयल्टी (₹ प्रति प्रिंट)") },
+app/src/main/java/com/example/MainActivity.kt:5290: Text("रद्द")
+app/src/main/java/com/example/MainActivity.kt:5301: Text("अपडेट", fontWeight = FontWeight.Bold)
+app/src/main/java/com/example/MainActivity.kt:5395: Text("कॅमेरा परवानगी आवश्यक आहे (Camera Permission Required)", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+app/src/main/java/com/example/MainActivity.kt:5512: text = "दुकानचा QR कोड स्कॅन करा (Scanning...)",
+app/src/main/java/com/example/MainActivity.kt:5622: text = "📷 कॅमेरा स्कॅनर सुरू आहे (Viewfinder Active)",
+app/src/main/java/com/example/MainActivity.kt:5628: text = "मोबाईल कॅमेरा दुकानदाराच्या QR कोडकडे रोखा",
+app/src/main/java/com/example/MainActivity.kt:5640: Text("स्कॅन यशस्वी करा (Trigger Scan)", fontSize = 10.sp, fontWeight = FontWeight.Bold)
+app/src/main/java/com/example/MainActivity.kt:5688: text = if (isShopConnectedQR) "दुकानदार QR जोडणी यशस्वी!" else "दुकानदार QR जोडलेला नाही!",
+app/src/main/java/com/example/MainActivity.kt:5757: text = "लाईव्ह ऑर्डर ट्रॅकर (Live Progress)",
+app/src/main/java/com/example/MainActivity.kt:5786: text = "दस्तऐवज (Doc): ${activePrintJob?.serviceName}",
+app/src/main/java/com/example/MainActivity.kt:5793: text = "स्टेटस: $printJobStatus",
+app/src/main/java/com/example/MainActivity.kt:5825: "पेमेंट यशस्वी / QR स्कॅन्ड (Payment Confirmed)",
+app/src/main/java/com/example/MainActivity.kt:5826: "S3 मधून फाईल डाऊनलोड होत आहे (Downloading)",
+app/src/main/java/com/example/MainActivity.kt:5827: "प्रिंटरशी यशस्वी जोडणी (Printer Connected)",
+app/src/main/java/com/example/MainActivity.kt:5828: "दस्तऐवज प्रिंट होत आहे (Printing Document)",
+app/src/main/java/com/example/MainActivity.kt:5829: "प्रिंट पूर्ण झाली! (Completed Successfully)"
+app/src/main/java/com/example/MainActivity.kt:5867: text = "📄 नवीन QR ऑर्डर तयार करा (Xerox Order Generator)",
+app/src/main/java/com/example/MainActivity.kt:5873: text = "दुकानदाराला स्कॅन करून प्रिंट करण्यासाठी ऑर्डर QR कोड तयार करा",
+app/src/main/java/com/example/MainActivity.kt:5889: label = { Text("फाइलचे नाव (Document Name)", fontSize = 11.sp) },
+app/src/main/java/com/example/MainActivity.kt:5906: Text(text = "पेजेस संख्या (Page Count):", fontSize = 11.sp, color = Color.DarkGray)
+app/src/main/java/com/example/MainActivity.kt:5951: Text(text = "कलर प्रिंट (Color Print):", fontSize = 11.sp, color = Color.DarkGray)
+app/src/main/java/com/example/MainActivity.kt:5953: text = if (isColorInput) "₹10 प्रति पेज (Color)" else "₹2 प्रति पेज (B&W)",
+app/src/main/java/com/example/MainActivity.kt:5976: Text(text = "अंदाजे किंमत (Estimated Amount):", fontWeight = FontWeight.Bold, fontSize = 11.sp, color = Color.Black)
+app/src/main/java/com/example/MainActivity.kt:5995: Text("ऑर्डर QR कोड तयार करा (Generate QR)", fontWeight = FontWeight.Bold, fontSize = 11.sp)
+app/src/main/java/com/example/MainActivity.kt:6017: text = "✨ आपला Xerox ऑर्डर QR कोड:",
+app/src/main/java/com/example/MainActivity.kt:6314: text = "नवीन दुकान नोंदणी (Shop Registration)",
+app/src/main/java/com/example/MainActivity.kt:6341: text = "नोंदणी शुल्क (Registration Fee)",
+app/src/main/java/com/example/MainActivity.kt:6354: text = "🎁 १ महिना अनलिमिटेड सेवा मोफत मिळेल!\n(Includes 1 Month FREE Unlimited Printing)",
+app/src/main/java/com/example/MainActivity.kt:6367: text = "रिचार्ज पेमेंट खालील ॲडमीन UPI ID वर करा:",
+app/src/main/java/com/example/MainActivity.kt:6414: label = { Text("UTR/ UPI ट्रान्सफर रेफरन्स आयडी लिहा", fontSize = 11.sp) },
+app/src/main/java/com/example/MainActivity.kt:6415: placeholder = { Text("उदा. 432109876543") },
+app/src/main/java/com/example/MainActivity.kt:6429: Toast.makeText(context, "कृपया ट्रान्सफर रेफरन्स आयडी लिहा!", Toast.LENGTH_LONG).show()
+app/src/main/java/com/example/MainActivity.kt:6435: Toast.makeText(context, "नोंदणी यशस्वी! १ महिना मोफत सेवा सुरू झाली. 🎉", Toast.LENGTH_LONG).show()
+app/src/main/java/com/example/MainActivity.kt:6446: Text("पेमेंट केले, नोंदणी पूर्ण करा (Register Now)", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+app/src/main/java/com/example/MainActivity.kt:6457: text = "← लॉगिन स्क्रीनवर परत जा (Back to Login)",
+app/src/main/java/com/example/MainActivity.kt:6521: text = "🔌 सबस्क्रिप्शन पॅक स्टेटस (Subscription Plan)",
+app/src/main/java/com/example/MainActivity.kt:6528: text = if (isExpired) "Expired / निष्क्रिय" else "ACTIVE / सक्रिय",
+app/src/main/java/com/example/MainActivity.kt:6542: text = "Validity दरम्यान ग्राहकांसाठी अमर्यादित (Unlimited) प्रिंट सेवा चालू राहील.",
+app/src/main/java/com/example/MainActivity.kt:6588: text = "⏳ प्रलंबित मॅन्युअल पेमेंट पडताळणी (Pending Payments)",
+app/src/main/java/com/example/MainActivity.kt:6596: text = "तुम्ही पाठवलेल्या मॅन्युअल पेमेंटची खात्री करून खालील 'Verified' बटणावर क्लिक करा जेणेकरून सबस्क्रिप्शन तात्काळ सक्रिय होईल.",
+app/src/main/java/com/example/MainActivity.kt:6631: text = "रक्कम: ₹${tx.amount.toInt()} | ${java.text.SimpleDateFormat("dd/MM/yyyy HH:mm").format(java.util.Date(tx.timestamp))}",
+app/src/main/java/com/example/MainActivity.kt:6640: Toast.makeText(context, "पेमेंट पडताळणी यशस्वी! सबस्क्रिप्शन सक्रिय झाले. 🎉", Toast.LENGTH_LONG).show()
+app/src/main/java/com/example/MainActivity.kt:6661: text = "⚡ रिचार्ज प्लॅन्स (Select Subscription Plans):",
+app/src/main/java/com/example/MainActivity.kt:6719: text = "कालावधी: ${months} महिने ${if (extraDays > 0) "+ $extraDays दिवस बोनस" else ""}",
+app/src/main/java/com/example/MainActivity.kt:6744: text = "⚙️ प्रोफाईल आणि युपीआय सेटिंग्स (Profile & UPI Settings):",
+app/src/main/java/com/example/MainActivity.kt:6760: text = "तुमचे स्वतःचे UPI आणि क्रेडेन्शियल्स सुधारित करा. ग्राहक पेमेंट थेट तुमच्या या UPI ला पाठवतील.",
+app/src/main/java/com/example/MainActivity.kt:6771: label = { Text("दुकानदाराचा UPI ID (Owner UPI)", color = Color.White, fontSize = 11.sp) },
+app/src/main/java/com/example/MainActivity.kt:6788: label = { Text("लॉगिन युझरनेम (Owner Username)", color = Color.White, fontSize = 11.sp) },
+app/src/main/java/com/example/MainActivity.kt:6805: label = { Text("लॉगिन पासवर्ड (Owner Password)", color = Color.White, fontSize = 11.sp) },
+app/src/main/java/com/example/MainActivity.kt:6826: Toast.makeText(context, "कृपया सर्व रकाने अचूक भरा!", Toast.LENGTH_SHORT).show()
+app/src/main/java/com/example/MainActivity.kt:6830: Toast.makeText(context, "सेटिंग्ज यशस्वीरित्या अपडेट केल्या! 💾", Toast.LENGTH_SHORT).show()
+app/src/main/java/com/example/MainActivity.kt:6838: Text("अपडेट करा", fontWeight = FontWeight.Bold, fontSize = 11.sp)
+app/src/main/java/com/example/MainActivity.kt:6844: Toast.makeText(context, "लॉग आउट यशस्वी!", Toast.LENGTH_SHORT).show()
+app/src/main/java/com/example/MainActivity.kt:6852: Text("लॉग आउट", fontWeight = FontWeight.Bold, fontSize = 11.sp)
+app/src/main/java/com/example/MainActivity.kt:6862: text = "📜 रिचार्ज इतिहास (Transaction History):",
+app/src/main/java/com/example/MainActivity.kt:6878: text = "अद्याप कोणतेही रिचार्ज केलेले नाहीत.",
+app/src/main/java/com/example/MainActivity.kt:6908: text = "पॅक: ${tx.packName}",
+app/src/main/java/com/example/MainActivity.kt:6966: text = "मॅन्युअल सबस्क्रिप्शन रिचार्ज",
+app/src/main/java/com/example/MainActivity.kt:6979: text = "रिचार्ज पॅक रक्कम:",
+app/src/main/java/com/example/MainActivity.kt:6990: text = "कालावधी: $months महिने ${if (extraDays > 0) "+ $extraDays दिवस" else ""}",
+app/src/main/java/com/example/MainActivity.kt:6999: text = "खालील ॲडमीन UPI ID वर ₹${price.toInt()} रुपये पाठवून मॅन्युअल ट्रान्सफर करा आणि रेफरन्स आयडी लिहा:",
+app/src/main/java/com/example/MainActivity.kt:7046: label = { Text("ट्रान्सफर रेफरन्स आयडी लिहा (UPI Ref ID)", fontSize = 11.sp) },
+app/src/main/java/com/example/MainActivity.kt:7047: placeholder = { Text("उदा. 432109876543") },
+app/src/main/java/com/example/MainActivity.kt:7058: Toast.makeText(context, "कृपया ट्रान्सफर रेफरन्स आयडी लिहा!", Toast.LENGTH_LONG).show()
+app/src/main/java/com/example/MainActivity.kt:7063: Toast.makeText(context, "मॅन्युअल रिचार्ज विनंती यशस्वीरित्या सबमिट झाली! कृपया खाली पडताळणी करा. ⏳", Toast.LENGTH_LONG).show()
+app/src/main/java/com/example/MainActivity.kt:7074: Text("रिचार्ज कन्फर्म करा", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+app/src/main/java/com/example/MainActivity.kt:7121: text = "🔎 प्रिंट प्रीव्ह्यू (Print Preview)",
+app/src/main/java/com/example/MainActivity.kt:7238: text = "सध्याचे रोटेशन: ${printRotation.toInt()}°",
+app/src/main/java/com/example/MainActivity.kt:7259: Text("सर्व्हिस (Service):", fontSize = 11.sp, color = Color(0xFF64748B))
+app/src/main/java/com/example/MainActivity.kt:7260: Text(selectedService?.name ?: "डॉक्युमेंट प्रिंट", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFF0F172A))
+app/src/main/java/com/example/MainActivity.kt:7266: Text("एकूण आकार (Size):", fontSize = 11.sp, color = Color(0xFF64748B))
+app/src/main/java/com/example/MainActivity.kt:7273: Text("निवडलेला प्रिंटर (Target Printer):", fontSize = 11.sp, color = Color(0xFF64748B))
+app/src/main/java/com/example/MainActivity.kt:7275: text = if (primaryPrinter != null) "${primaryPrinter.name} (${primaryPrinter.status})" else "कोणताही उपलब्ध नाही",
+app/src/main/java/com/example/MainActivity.kt:7294: Text("बंद करा")
+app/src/main/java/com/example/MainActivity.kt:7306: Text("कन्फर्म & पे (₹${price.toInt()})", fontWeight = FontWeight.Bold)
+app/src/main/java/com/example/MainActivity.kt:7444: text = "दुकानदार लॉगिन (Owner Login)",
+app/src/main/java/com/example/MainActivity.kt:7465: label = { Text("युझरनेम (Username)", fontSize = 12.sp) },
+app/src/main/java/com/example/MainActivity.kt:7479: label = { Text("पासवर्ड (Password)", fontSize = 12.sp) },
+app/src/main/java/com/example/MainActivity.kt:7501: errorMessage = "कृपया युझरनेम आणि पासवर्ड भरा."
+app/src/main/java/com/example/MainActivity.kt:7506: errorMessage = "गलत युझरनेम किंवा पासवर्ड!"
+app/src/main/java/com/example/MainActivity.kt:7508: Toast.makeText(context, "लॉगिन यशस्वी! 🔓", Toast.LENGTH_SHORT).show()
+app/src/main/java/com/example/MainActivity.kt:7520: Text("लॉगिन करा (Verify & Login)", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+app/src/main/java/com/example/MainActivity.kt:7528: text = "पासवर्ड विसरलात? (Forgot Password?)",
+app/src/main/java/com/example/MainActivity.kt:7549: Text("नवीन दुकान नोंदणी (Register New Shop)", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+app/src/main/java/com/example/MainActivity.kt:7635: text = "ॲडमीन पॅनेल लॉगिन (Admin Central)",
+app/src/main/java/com/example/MainActivity.kt:7656: label = { Text("युझरनेम (Username)", fontSize = 12.sp) },
+app/src/main/java/com/example/MainActivity.kt:7670: label = { Text("पासवर्ड (Password)", fontSize = 12.sp) },
+app/src/main/java/com/example/MainActivity.kt:7692: errorMessage = "कृपया युझरनेम आणि पासवर्ड भरा."
+app/src/main/java/com/example/MainActivity.kt:7697: errorMessage = "गलत ॲडमीन युझरनेम किंवा पासवर्ड!"
+app/src/main/java/com/example/MainActivity.kt:7699: Toast.makeText(context, "ॲडमीन लॉगिन यशस्वी! 🔐", Toast.LENGTH_SHORT).show()
+app/src/main/java/com/example/MainActivity.kt:7711: Text("लॉगिन करा (Verify Admin)", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+app/src/main/java/com/example/MainActivity.kt:7719: text = "पासवर्ड विसरलात? (Forgot Password?)",
+app/src/main/java/com/example/MainActivity.kt:7779: text = "पासवर्ड विसरलात? (Forgot Password - Owner)",
+app/src/main/java/com/example/MainActivity.kt:7787: text = "तुमचा पासवर्ड रीसेट करण्यासाठी ॲडमीनचा पासवर्ड टाका. (Enter Admin's Password to reset owner's password)",
+app/src/main/java/com/example/MainActivity.kt:7796: label = { Text("ॲडमीन पासवर्ड (Admin Password)", fontSize = 11.sp) },
+app/src/main/java/com/example/MainActivity.kt:7805: label = { Text("नवीन पासवर्ड (New Owner Password)", fontSize = 11.sp) },
+app/src/main/java/com/example/MainActivity.kt:7818: errorText = "कृपया सर्व फील्ड भरा."
+app/src/main/java/com/example/MainActivity.kt:7823: Toast.makeText(context, "पासवर्ड यशस्वीरित्या बदलला! 🎉", Toast.LENGTH_SHORT).show()
+app/src/main/java/com/example/MainActivity.kt:7826: errorText = "चुकीचा ॲडमीन पासवर्ड!"
+app/src/main/java/com/example/MainActivity.kt:7833: Text("रीसेट करा (Reset Password)", color = Color.White, fontWeight = FontWeight.Bold)
+app/src/main/java/com/example/MainActivity.kt:7840: Text("किंवा ईमेलद्वारे रीसेट करा (Or reset via Email Link)", fontSize = 10.sp, color = Color(0xFF2563EB))
+app/src/main/java/com/example/MainActivity.kt:7844: text = "तुमचा ईमेल पत्ता टाका. आम्ही पासवर्ड रीसेट लिंक पाठवू. (Enter your registered email to receive a password reset link)",
+app/src/main/java/com/example/MainActivity.kt:7853: label = { Text("नोंदणीकृत ईमेल (Registered Email)", fontSize = 11.sp) },
+app/src/main/java/com/example/MainActivity.kt:7865: errorText = "कृपया वैध ईमेल टाका."
+app/src/main/java/com/example/MainActivity.kt:7870: Toast.makeText(context, "पासवर्ड रीसेट लिंक पाठवली! कृपया ईमेल तपासा. 📬", Toast.LENGTH_LONG).show()
+app/src/main/java/com/example/MainActivity.kt:7873: errorText = error ?: "पासवर्ड रीसेट लिंक पाठवण्यास अडचण आली."
+app/src/main/java/com/example/MainActivity.kt:7880: Text("रीसेट लिंक पाठवा (Send Reset Link)", color = Color.White, fontWeight = FontWeight.Bold)
+app/src/main/java/com/example/MainActivity.kt:7887: Text("परत जा (Go Back)", fontSize = 10.sp, color = Color.Gray)
+app/src/main/java/com/example/MainActivity.kt:7920: text = "ॲडमीन पासवर्ड विसरलात? (Forgot Password - Admin)",
+app/src/main/java/com/example/MainActivity.kt:7928: text = "तुमचा पासवर्ड रीसेट करण्यासाठी तुमचा मास्टर युपीआय आयडी टाका. (Enter your Master UPI ID to reset admin password)",
+app/src/main/java/com/example/MainActivity.kt:7937: label = { Text("मास्टर युपीआय (Master UPI ID)", fontSize = 11.sp) },
+app/src/main/java/com/example/MainActivity.kt:7945: label = { Text("नवीन पासवर्ड (New Admin Password)", fontSize = 11.sp) },
+app/src/main/java/com/example/MainActivity.kt:7958: errorText = "कृपया सर्व फील्ड भरा."
+app/src/main/java/com/example/MainActivity.kt:7963: Toast.makeText(context, "ॲडमीन पासवर्ड यशस्वीरित्या बदलला! 🎉", Toast.LENGTH_SHORT).show()
+app/src/main/java/com/example/MainActivity.kt:7966: errorText = "चुकीचा मास्टर युपीआय आयडी!"
+app/src/main/java/com/example/MainActivity.kt:7973: Text("रीसेट करा (Reset Password)", color = Color.White, fontWeight = FontWeight.Bold)
+app/src/main/java/com/example/MainActivity.kt:7980: Text("किंवा ईमेलद्वारे रीसेट करा (Or reset via Email Link)", fontSize = 10.sp, color = Color(0xFF9333EA))
+app/src/main/java/com/example/MainActivity.kt:7984: text = "तुमचा ईमेल पत्ता टाका. आम्ही पासवर्ड रीसेट लिंक पाठवू. (Enter your registered email to receive a password reset link)",
+app/src/main/java/com/example/MainActivity.kt:7993: label = { Text("नोंदणीकृत ईमेल (Registered Email)", fontSize = 11.sp) },
+app/src/main/java/com/example/MainActivity.kt:8005: errorText = "कृपया वैध ईमेल टाका."
+app/src/main/java/com/example/MainActivity.kt:8010: Toast.makeText(context, "पासवर्ड रीसेट लिंक पाठवली! कृपया ईमेल तपासा. 📬", Toast.LENGTH_LONG).show()
+app/src/main/java/com/example/MainActivity.kt:8013: errorText = error ?: "पासवर्ड रीसेट लिंक पाठवण्यास अडचण आली."
+app/src/main/java/com/example/MainActivity.kt:8020: Text("रीसेट लिंक पाठवा (Send Reset Link)", color = Color.White, fontWeight = FontWeight.Bold)
+app/src/main/java/com/example/MainActivity.kt:8027: Text("परत जा (Go Back)", fontSize = 10.sp, color = Color.Gray)
+app/src/main/java/com/example/viewmodel/SmartXeroxViewModel.kt:981: addHeartbeatLog("⏳ मॅन्युअल रिचार्ज विनंती सबमिट केली: ₹${price.toInt()} (Ref ID: $refId). पडताळणी प्रलंबित आहे.")
+app/src/main/java/com/example/viewmodel/SmartXeroxViewModel.kt:1022: addHeartbeatLog("✅ पेमेंट पडताळणी यशस्वी! सबस्क्रिप्शन सक्रिय केले. नवीन मुदत: ${java.text.SimpleDateFormat("dd/MM/yyyy HH:mm").format(java.util.Date(newExpiry))}")

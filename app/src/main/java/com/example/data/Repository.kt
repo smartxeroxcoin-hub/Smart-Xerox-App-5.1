@@ -31,6 +31,9 @@ class SmartXeroxRepository(private val dao: SmartXeroxDao) {
     // New: Transactions
     val transactions: Flow<List<Transaction>> = dao.getAllTransactions()
 
+    // New: Cloud Storage Batches
+    val cloudBatches: Flow<List<CloudStorageBatch>> = dao.getAllCloudBatches()
+
     suspend fun updateServiceRate(rate: ServiceRate) {
         dao.updateServiceRate(rate)
     }
@@ -45,6 +48,10 @@ class SmartXeroxRepository(private val dao: SmartXeroxDao) {
 
     suspend fun insertOrder(order: PrintOrder) {
         dao.insertOrder(order)
+    }
+
+    suspend fun getAllOrdersDirect(): List<PrintOrder> {
+        return dao.getAllOrdersDirect()
     }
 
     suspend fun updateOrder(order: PrintOrder) {
@@ -86,6 +93,14 @@ class SmartXeroxRepository(private val dao: SmartXeroxDao) {
         dao.insertTransaction(tx)
     }
 
+    suspend fun insertCloudBatch(batch: CloudStorageBatch) {
+        dao.insertCloudBatch(batch)
+    }
+
+    suspend fun deleteCloudBatch(id: String) {
+        dao.deleteCloudBatch(id)
+    }
+
     suspend fun prepopulateData() {
         // Prepopulate printer configuration if not present
         if (dao.getPrinterConfigDirect() == null) {
@@ -106,19 +121,20 @@ class SmartXeroxRepository(private val dao: SmartXeroxDao) {
         }
 
         // Prepopulate default recharge packs
-        dao.insertRechargePack(RechargePack("pack_mini", "Mini Pack 50", 100.0, 50, "योग्य व्यवसायांसाठी ५० प्रिंट क्रेडिट्स (₹2/print)"))
-        dao.insertRechargePack(RechargePack("pack_pro", "Pro Pack 200", 300.0, 200, "जास्त ग्राहकांसाठी २०० प्रिंट क्रेडिट्स (₹1.5/print)"))
-        dao.insertRechargePack(RechargePack("pack_unlimited", "Enterprise Pack 1000", 1000.0, 1000, "मोठ्या दुकानांसाठी १,००० प्रिंट क्रेडिट्स (₹1/print)"))
+        dao.insertRechargePack(RechargePack("pack_mini", "Mini Pack 50", 100.0, 50, "50 print credits for small businesses (₹2/print)"))
+        dao.insertRechargePack(RechargePack("pack_pro", "Pro Pack 200", 300.0, 200, "200 print credits for busy shops (₹1.5/print)"))
+        dao.insertRechargePack(RechargePack("pack_unlimited", "Enterprise Pack 1000", 1000.0, 1000, "1,000 print credits for enterprise shops (₹1/print)"))
 
-        // Prepopulate default credits
+        // Prepopulate default credits and registration status
         if (dao.getOwnerCreditsDirect() == null) {
-            dao.insertOwnerCredits(OwnerCredits(balance = 100))
+            dao.insertOwnerCredits(OwnerCredits(balance = 100, isRegistered = false, subscriptionExpires = 0L))
         }
 
         // Prepopulate service rates if empty
         val defaultRates = listOf(
             // Category: Document Services
             ServiceRate("passport_photo_ai", "Passport Photo AI (Background White)", 30.0, "AI Services"),
+            ServiceRate("id_card_xerox", "ID Card Xerox (Single Page Front & Back)", 5.0, "Document Services"),
             ServiceRate("a4_xerox_bw_single", "A4 Xerox Single-Side (B&W)", 2.0, "Document Services"),
             ServiceRate("a4_xerox_bw_double", "A4 Xerox Double-Side (B&W)", 3.0, "Document Services"),
             ServiceRate("a4_print_color_hq", "A4 Color Print (High Quality)", 10.0, "Document Services"),
