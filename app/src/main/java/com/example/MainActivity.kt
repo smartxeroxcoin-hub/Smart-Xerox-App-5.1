@@ -74,6 +74,7 @@ import com.example.data.AdminSettings
 import com.example.data.PrintOrder
 import com.example.data.PrinterConfig
 import com.example.data.ServiceRate
+import com.example.data.Transaction
 import com.example.ui.theme.MyApplicationTheme
 import com.example.viewmodel.AppPerspective
 import com.example.viewmodel.SmartXeroxViewModel
@@ -106,10 +107,8 @@ class MainActivity : ComponentActivity() {
         
         val viewModel = ViewModelProvider(this)[SmartXeroxViewModel::class.java]
         intent?.dataString?.let { data ->
-            if (data.contains("OWNER01") || data.contains("shop") || data.contains("store") || data.contains("smartxerox")) {
+            if (data.contains("OWNER01")) {
                 viewModel.connectShopViaQR()
-                Toast.makeText(this, "Welcome! Connected to Shop OWNER01 via Deep Link! 🎉", Toast.LENGTH_LONG).show()
-                viewModel.playOrderSuccessSound()
             }
         }
 
@@ -135,10 +134,8 @@ class MainActivity : ComponentActivity() {
         setIntent(intent)
         val viewModel = ViewModelProvider(this)[SmartXeroxViewModel::class.java]
         intent.dataString?.let { data ->
-            if (data.contains("OWNER01") || data.contains("shop") || data.contains("store") || data.contains("smartxerox")) {
+            if (data.contains("OWNER01")) {
                 viewModel.connectShopViaQR()
-                Toast.makeText(this, "Connected to Shop OWNER01 via Deep Link! 🎉", Toast.LENGTH_LONG).show()
-                viewModel.playOrderSuccessSound()
             }
         }
     }
@@ -183,6 +180,18 @@ fun SmartXeroxDashboardScreen(
             .fillMaxSize()
             .background(Color(0xFFF3F4F9))
     ) {
+        val showUniversalPreview by viewModel.showUniversalPreview.collectAsState()
+        if (showUniversalPreview) {
+            val selectedService by viewModel.selectedService.collectAsState()
+            val totalPrice = selectedService?.rate ?: 30.0
+            UniversalPrintPreviewDialog(
+                viewModel = viewModel,
+                isPassport = selectedService?.id == "passport_photo" || selectedService?.name?.contains("Passport", ignoreCase = true) == true,
+                price = totalPrice,
+                onConfirm = { viewModel.openPayment() }
+            )
+        }
+
         Column(modifier = Modifier.fillMaxSize()) {
             // Elegant Top Header with App Title and Global Reset
             HeaderSection(
@@ -624,6 +633,44 @@ fun PerspectiveTabs(
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun WebPortalLinkBanner() {
+    val context = LocalContext.current
+    val webUrl = "https://ais-dev-nlecgp4wfa3sgpjani44jp-135102368660.asia-southeast1.run.app/login.html"
+    Surface(
+        onClick = {
+            try {
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(webUrl))
+                context.startActivity(intent)
+            } catch (e: Exception) {
+                Toast.makeText(context, "Could not open browser", Toast.LENGTH_SHORT).show()
+            }
+        },
+        color = Color(0xFFEFF6FF),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Icon(
+                imageVector = Icons.Default.Public,
+                contentDescription = null,
+                tint = Color(0xFF2563EB),
+                modifier = Modifier.size(16.dp)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = "🌐 Open Admin & Owner Web Portal Dashboard in Browser",
+                color = Color(0xFF1E40AF),
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Bold
+            )
         }
     }
 }
@@ -1115,10 +1162,16 @@ fun CustomerUPIPaymentQRPortalScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "Scan to Pay:",
+                        text = "Smart X Point • Scan to Pay",
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF0F172A),
-                        fontSize = 12.sp,
+                        fontSize = 12.sp
+                    )
+                    Text(
+                        text = "Support: 7720007020",
+                        fontSize = 9.sp,
+                        color = Color(0xFF64748B),
+                        fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
 
@@ -2397,10 +2450,14 @@ fun StandardServiceUploadScreen(viewModel: SmartXeroxViewModel) {
         }
     }
 
+    val scrollState = rememberScrollState()
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(8.dp)
+            .verticalScroll(scrollState)
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -2655,12 +2712,16 @@ fun StandardServiceUploadScreen(viewModel: SmartXeroxViewModel) {
         // Total price and Pay button
         Button(
             onClick = { 
-                if (documentName.isEmpty()) {
-                    documentName = "document.pdf" // Auto pick default
+                if (documentName.isBlank()) {
+                    Toast.makeText(context, "⚠️ Please upload or select a document before proceeding to payment!", Toast.LENGTH_SHORT).show()
+                } else {
+                    viewModel.toggleUniversalPreview(true) // Open preview first!
                 }
-                viewModel.toggleUniversalPreview(true) // Open preview first!
             },
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6750A4), contentColor = Color.White),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = if (documentName.isNotBlank()) Color(0xFF6750A4) else Color(0xFF94A3B8),
+                contentColor = Color.White
+            ),
             modifier = Modifier
                 .fillMaxWidth()
                 .height(54.dp),
@@ -2863,15 +2924,27 @@ fun ShopOwnerScreen(
     var showEditRateDialog by remember { mutableStateOf<ServiceRate?>(null) }
     var ownerSubTab by remember { mutableStateOf("Printers & Logs") } // Initialize directly to one of the tabs
 
+    if (showEditRateDialog != null) {
+        EditRateDialog(
+            serviceRate = showEditRateDialog!!,
+            onDismiss = { showEditRateDialog = null },
+            onSave = { updated ->
+                viewModel.updateServiceRate(updated.id, updated.name, updated.rate, updated.category, updated.rate)
+                showEditRateDialog = null
+                Toast.makeText(ctx, "Rate updated successfully! ⚙️", Toast.LENGTH_SHORT).show()
+            }
+        )
+    }
+
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(bottom = 72.dp) // Leave space for bottom navigation bar
+                .padding(bottom = 75.dp) // Leave space for bottom navigation bar
                 .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             SxpBrandHeaderComponent(
                 title = "Smart X Point • Shop Owner Portal",
@@ -2902,11 +2975,11 @@ fun ShopOwnerScreen(
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0F172A)),
                 shape = RoundedCornerShape(10.dp),
-                modifier = Modifier.fillMaxWidth().height(40.dp)
+                modifier = Modifier.fillMaxWidth().height(36.dp)
             ) {
                 Icon(imageVector = Icons.Default.CheckCircle, contentDescription = "Diagnose", tint = Color(0xFF22C55E), modifier = Modifier.size(16.dp))
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Run Active Session & QR Reachability Diagnostics", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                Text("Run Active Session & QR Reachability Diagnostics", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color.White)
             }
 
             // Visual subscription warning system
@@ -2929,12 +3002,10 @@ fun ShopOwnerScreen(
                         if (isExpired) Color(0xFFEF4444) else Color(0xFFF59E0B)
                     ),
                     shape = RoundedCornerShape(16.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 12.dp)
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     Row(
-                        modifier = Modifier.padding(14.dp),
+                        modifier = Modifier.padding(12.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
@@ -2989,7 +3060,7 @@ fun ShopOwnerScreen(
             ) {
                 Row(
                     modifier = Modifier
-                        .padding(14.dp)
+                        .padding(12.dp)
                         .fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
@@ -2999,20 +3070,20 @@ fun ShopOwnerScreen(
                             imageVector = if (isServiceRunning) Icons.Default.PlayCircleFilled else Icons.Default.PauseCircle,
                             contentDescription = null,
                             tint = if (isServiceRunning) Color(0xFF10B981) else Color(0xFF64748B),
-                            modifier = Modifier.size(32.dp)
+                            modifier = Modifier.size(28.dp)
                         )
-                        Spacer(modifier = Modifier.width(12.dp))
+                        Spacer(modifier = Modifier.width(10.dp))
                         Column {
                             Text(
                                 text = if (isServiceRunning) "Smart X Point Active Service" else "Service Paused",
                                 fontWeight = FontWeight.Bold,
                                 color = if (isServiceRunning) Color(0xFF065F46) else Color(0xFF475569),
-                                fontSize = 14.sp
+                                fontSize = 13.sp
                             )
                             Text(
                                 text = if (isServiceRunning) ": $nextHeartbeatSeconds" else "Heartbeat Off - Customer can't order",
                                 color = if (isServiceRunning) Color(0xFF047857) else Color(0xFF64748B),
-                                fontSize = 11.sp
+                                fontSize = 10.sp
                             )
                         }
                     }
@@ -3049,34 +3120,25 @@ fun ShopOwnerScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(14.dp))
+            Spacer(modifier = Modifier.height(4.dp))
 
             // Render Sub Tabs Content
             Box(
-                modifier = Modifier.weight(1f)
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
             ) {
                 when (ownerSubTab) {
                     "Printers & Logs" -> {
-                        LazyColumn(
-                            modifier = Modifier.fillMaxSize(),
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .verticalScroll(rememberScrollState()),
                             verticalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
-                            // Multi-printer Settings Panel
-                            item {
-                                PrinterSettingsPanel(
-                                    viewModel = viewModel
-                                )
-                            }
-
-                            // Foreground Service Notification Preview Mockup
-                            item {
-                                ForegroundNotificationMockup(viewModel = viewModel)
-                            }
-
-                            // Heartbeat Pings Console
-                            item {
-                                HeartbeatConsole(logs = heartbeatLogs)
-                            }
+                            PrinterSettingsPanel(viewModel = viewModel)
+                            ForegroundNotificationMockup(viewModel = viewModel)
+                            HeartbeatConsole(logs = heartbeatLogs)
                         }
                     }
                     "Rates Config" -> {
@@ -3698,7 +3760,12 @@ fun ShopkeeperRatesConfigPanel(
     
     val filteredServices = serviceRates.filter { it.category == selectedCategory }
 
-    Column(modifier = Modifier.fillMaxSize()) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
         // Horizontal scroll category
         ScrollableTabRow(
             selectedTabIndex = categories.indexOf(selectedCategory),
@@ -3717,28 +3784,25 @@ fun ShopkeeperRatesConfigPanel(
                 )
             }
         }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
+        Spacer(modifier = Modifier.height(4.dp))
         Card(
             colors = CardDefaults.cardColors(containerColor = Color(0xFF1E293B)),
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp)
         ) {
-            Column(modifier = Modifier.padding(12.dp)) {
+            Column(modifier = Modifier.padding(14.dp)) {
                 Text(
-                    text = "Shopkeeper Custom Rates",
+                    text = "Shopkeeper Custom Rates ($selectedCategory)",
                     fontWeight = FontWeight.Bold,
                     color = Color.White,
                     fontSize = 12.sp,
-                    modifier = Modifier.padding(bottom = 8.dp)
+                    modifier = Modifier.padding(bottom = 10.dp)
                 )
-
-                LazyColumn(
+                Column(
                     verticalArrangement = Arrangement.spacedBy(6.dp),
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    items(filteredServices) { service ->
+                    filteredServices.forEach { service ->
                         Surface(
                             color = Color(0xFF0F172A),
                             shape = RoundedCornerShape(8.dp)
@@ -3794,6 +3858,7 @@ fun ShopkeeperRatesConfigPanel(
                 }
             }
         }
+        Spacer(modifier = Modifier.height(20.dp))
     }
 }
 
@@ -4381,7 +4446,7 @@ fun ShopVoiceLogsPanel(viewModel: SmartXeroxViewModel) {
 fun ShopQRPanel(viewModel: SmartXeroxViewModel) {
     val context = LocalContext.current
     var qrDownloaded by remember { mutableStateOf(false) }
-    val rawShopUrl = "https://ais-pre-nlecgp4wfa3sgpjani44jp-135102368660.asia-southeast1.run.app/?shop=OWNER01"
+    val rawShopUrl = "https://ais-dev-nlecgp4wfa3sgpjani44jp-135102368660.asia-southeast1.run.app/?shop=OWNER01"
     val shopUrl = viewModel.validateAndSanitizeUrl(rawShopUrl)
 
     val ownerCredits by viewModel.ownerCredits.collectAsState()
@@ -4510,15 +4575,21 @@ fun ShopQRPanel(viewModel: SmartXeroxViewModel) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 QRCodeMockup(
                                     payload = currentPayload,
-                                    modifier = Modifier.size(140.dp)
+                                    modifier = Modifier.size(130.dp)
                                 )
-                                Spacer(modifier = Modifier.height(6.dp))
+                                Spacer(modifier = Modifier.height(4.dp))
                                 Text(
-                                    text = if (qrType == "Ordering") "SCAN TO PRINT 📄" else "SCAN TO PAY 💸",
+                                    text = if (qrType == "Ordering") "Smart X Point • SCAN TO PRINT" else "Smart X Point • SCAN TO PAY",
                                     fontWeight = FontWeight.ExtraBold,
                                     color = Color(0xFF6750A4),
-                                    fontSize = 10.sp,
+                                    fontSize = 9.sp,
                                     letterSpacing = 0.5.sp
+                                )
+                                Text(
+                                    text = "Support: 7720007020",
+                                    color = Color.DarkGray,
+                                    fontSize = 8.sp,
+                                    fontWeight = FontWeight.Bold
                                 )
                             }
                         }
@@ -4758,17 +4829,61 @@ fun AdminDashboardScreen(
 
     var adminTab by remember { mutableStateOf("Overview & Franchise") }
 
+    val adminScrollState = rememberScrollState()
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(adminScrollState)
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
+        WebPortalLinkBanner()
         SxpBrandHeaderComponent(
             title = "Smart X Point • Super Admin Master Dashboard",
             subtitle = "Franchise Control, Global Pricing & Audit Logs",
             customLogoUri = adminSettings.customLogoUri
         )
+
+        // Real-time Firestore Sync Status Indicator Banner (Compact & Professional)
+        Surface(
+            color = Color(0xFFECFDF5),
+            shape = RoundedCornerShape(8.dp),
+            border = BorderStroke(1.dp, Color(0xFFA7F3D0)),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Row(
+                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier
+                            .size(8.dp)
+                            .background(Color(0xFF10B981), RoundedCornerShape(50.dp))
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        text = "Live Sync: Online",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = Color(0xFF065F46)
+                    )
+                }
+                Surface(
+                    color = Color(0xFFD1FAE5),
+                    shape = RoundedCornerShape(4.dp)
+                ) {
+                    Text(
+                        text = "Auth Active",
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF047857),
+                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                    )
+                }
+            }
+        }
 
         // Admin Navigation Tabs
         Row(
@@ -4812,11 +4927,30 @@ fun AdminDashboardScreen(
 
         when (adminTab) {
             "Cloud & Deployment" -> {
-                val scrollState = rememberScrollState()
                 Column(
-                    modifier = Modifier.fillMaxSize().verticalScroll(scrollState),
+                    modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
+                    // Deployment & Cloud Status (Cleaned as requested)
+                    Card(
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFF1E293B)),
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(imageVector = Icons.Default.Cloud, contentDescription = null, tint = Color(0xFFFFB300), modifier = Modifier.size(20.dp))
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("Cloud & Deployment Status", fontWeight = FontWeight.Bold, fontSize = 13.sp, color = Color.White)
+                            }
+                            Text(
+                                text = "Admin panel is configured for cloud deployment and live Firestore synchronization.",
+                                fontSize = 11.sp,
+                                color = Color.LightGray
+                            )
+                        }
+                    }
+
                     Card(
                         colors = CardDefaults.cardColors(containerColor = Color(0xFF1E293B)),
                         shape = RoundedCornerShape(12.dp),
@@ -5044,11 +5178,10 @@ fun AdminDashboardScreen(
                 val isApiOnline by viewModel.isApiOnline.collectAsState()
                 val geminiStatus by viewModel.geminiStatus.collectAsState()
                 val firebaseStatus by viewModel.firebaseStatus.collectAsState()
-                val scrollState = rememberScrollState()
                 var healthSubTab by remember { mutableStateOf("System Logs") }
 
                 Column(
-                    modifier = Modifier.fillMaxSize().verticalScroll(scrollState),
+                    modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -5332,7 +5465,6 @@ fun AdminDashboardScreen(
             }
         }
             "Overview & Franchise" -> {
-                val scrollState = rememberScrollState()
                 val masterTransactions by viewModel.transactions.collectAsState()
                 val sdfDay = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
                 val todayStr = sdfDay.format(java.util.Date())
@@ -5341,9 +5473,108 @@ fun AdminDashboardScreen(
                 val context = LocalContext.current
 
                 Column(
-                    modifier = Modifier.fillMaxSize().verticalScroll(scrollState),
+                    modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
+                    // Franchise Owner Management Card (Delete / Reset Unpaid / Mistake Registration)
+                    Card(
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFF1E293B)),
+                        shape = RoundedCornerShape(12.dp),
+                        border = BorderStroke(1.dp, Color(0xFFEF4444)),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        val ownerCredits by viewModel.ownerCredits.collectAsState()
+                        var showDeleteOwnerConfirm by remember { mutableStateOf(false) }
+
+                        if (showDeleteOwnerConfirm) {
+                            AlertDialog(
+                                onDismissRequest = { showDeleteOwnerConfirm = false },
+                                title = { Text("⚠️ Delete Shop Owner Registration?", fontWeight = FontWeight.Bold, color = Color(0xFF991B1B)) },
+                                text = { Text("Are you sure you want to delete/reset the shop owner registration? Use this if registration occurred without payment or by mistake. The shop owner will need to re-register.", fontSize = 12.sp) },
+                                confirmButton = {
+                                    Button(
+                                        onClick = {
+                                            viewModel.resetOwnerRegistration { success ->
+                                                if (success) {
+                                                    Toast.makeText(context, "Shop owner registration deleted/reset successfully! 🗑️", Toast.LENGTH_SHORT).show()
+                                                    showDeleteOwnerConfirm = false
+                                                }
+                                            }
+                                        },
+                                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFEF4444))
+                                    ) {
+                                        Text("Yes, Delete Registration", color = Color.White, fontWeight = FontWeight.Bold)
+                                    }
+                                },
+                                dismissButton = {
+                                    TextButton(onClick = { showDeleteOwnerConfirm = false }) {
+                                        Text("Cancel")
+                                    }
+                                }
+                            )
+                        }
+
+                        Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column {
+                                    Text(
+                                        text = "Franchise Owner Account Control",
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color.White,
+                                        fontSize = 13.sp
+                                    )
+                                    Text(
+                                        text = "Manage registered shop status & unpaid/mistaken registrations",
+                                        color = Color.LightGray,
+                                        fontSize = 9.sp
+                                    )
+                                }
+                                Surface(
+                                    color = if (ownerCredits.isRegistered) Color(0xFFD1FAE5) else Color(0xFFFEE2E2),
+                                    shape = RoundedCornerShape(6.dp)
+                                ) {
+                                    Text(
+                                        text = if (ownerCredits.isRegistered) "REGISTERED" else "UNREGISTERED",
+                                        fontSize = 9.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = if (ownerCredits.isRegistered) Color(0xFF047857) else Color(0xFF991B1B),
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                    )
+                                }
+                            }
+
+                            Surface(
+                                color = Color(0xFF0F172A),
+                                shape = RoundedCornerShape(8.dp),
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Column(modifier = Modifier.padding(10.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                    Text("Shop Username: ${ownerCredits.ownerUsername}", fontSize = 11.sp, color = Color.White, fontWeight = FontWeight.Bold)
+                                    Text("Shop UPI ID: ${ownerCredits.ownerUpi}", fontSize = 11.sp, color = Color(0xFFFFB300))
+                                    val expDate = if (ownerCredits.subscriptionExpires > 0) java.text.SimpleDateFormat("dd MMM yyyy, hh:mm a", java.util.Locale.getDefault()).format(java.util.Date(ownerCredits.subscriptionExpires)) else "N/A"
+                                    Text("Subscription Expires: $expDate", fontSize = 10.sp, color = Color.LightGray)
+                                }
+                            }
+
+                            if (ownerCredits.isRegistered) {
+                                Button(
+                                    onClick = { showDeleteOwnerConfirm = true },
+                                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFEF4444)),
+                                    modifier = Modifier.fillMaxWidth(),
+                                    shape = RoundedCornerShape(8.dp)
+                                ) {
+                                    Icon(imageVector = Icons.Default.Delete, contentDescription = null, tint = Color.White, modifier = Modifier.size(14.dp))
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Text("Delete / Reset Owner Registration (Unpaid / Mistake)", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                                }
+                            }
+                        }
+                    }
+
                     // Daily Earnings & Completed Print Jobs Summary Card
                     Card(
                         colors = CardDefaults.cardColors(containerColor = Color(0xFF1E293B)),
@@ -5449,11 +5680,8 @@ fun AdminDashboardScreen(
                 }
             }
             "Pricing & Overrides" -> {
-                val scrollState = rememberScrollState()
                 Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .verticalScroll(scrollState),
+                    modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     // Default Service Rates list
@@ -5787,7 +6015,7 @@ fun AdminDashboardScreen(
                 Card(
                     colors = CardDefaults.cardColors(containerColor = Color(0xFF1E293B)),
                     shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(modifier = Modifier.padding(14.dp)) {
                         Text(
@@ -5799,18 +6027,19 @@ fun AdminDashboardScreen(
                         )
 
                         if (masterTransactions.isEmpty()) {
-                            Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                            Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth().height(100.dp)) {
                                 Text(text = "No transactions recorded yet.", color = Color.LightGray, fontSize = 11.sp)
                             }
                         } else {
-                            LazyColumn(
+                            Column(
                                 verticalArrangement = Arrangement.spacedBy(6.dp),
-                                modifier = Modifier.fillMaxSize()
+                                modifier = Modifier.fillMaxWidth()
                             ) {
-                                items(masterTransactions) { tx ->
+                                masterTransactions.forEach { tx ->
                                     Surface(
                                         color = Color(0xFF0F172A),
-                                        shape = RoundedCornerShape(8.dp)
+                                        shape = RoundedCornerShape(8.dp),
+                                        modifier = Modifier.fillMaxWidth()
                                     ) {
                                         Row(
                                             modifier = Modifier
@@ -5838,6 +6067,36 @@ fun AdminDashboardScreen(
             "Revenue Records" -> {
                 val masterTransactions by viewModel.transactions.collectAsState()
                 var revenueFilter by remember { mutableStateOf("ALL") } // "ALL", "REG", "REC"
+                var transactionSearchQuery by remember { mutableStateOf("") }
+                var transactionStatusFilter by remember { mutableStateOf("ALL") } // "ALL", "PENDING", "COMPLETED"
+                var transactionDateFilter by remember { mutableStateOf("ALL") } // "ALL", "TODAY", "7D", "30D"
+                var txToDelete by remember { mutableStateOf<Transaction?>(null) }
+
+                if (txToDelete != null) {
+                    AlertDialog(
+                        onDismissRequest = { txToDelete = null },
+                        title = { Text("⚠️ Delete Transaction Record?", fontWeight = FontWeight.Bold, color = Color(0xFF991B1B)) },
+                        text = { Text("Are you sure you want to delete transaction ID: ${txToDelete!!.id}? This will remove it from earnings and Firestore (useful for correcting mistaken or unpaid registrations).", fontSize = 12.sp) },
+                        confirmButton = {
+                            Button(
+                                onClick = {
+                                    val id = txToDelete!!.id
+                                    viewModel.deleteTransaction(id)
+                                    Toast.makeText(context, "Transaction $id deleted successfully! 🗑️", Toast.LENGTH_SHORT).show()
+                                    txToDelete = null
+                                },
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFEF4444))
+                            ) {
+                                Text("Yes, Delete", color = Color.White, fontWeight = FontWeight.Bold)
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = { txToDelete = null }) {
+                                Text("Cancel")
+                            }
+                        }
+                    )
+                }
 
                 val regTransactions = masterTransactions.filter { it.id.startsWith("#TX_REG_") }
                 val recTransactions = masterTransactions.filter { it.id.startsWith("#TX_REC_") || it.id.startsWith("#TX_RE") || it.packName.contains("Recharge", ignoreCase = true) }
@@ -5885,6 +6144,104 @@ fun AdminDashboardScreen(
                                 Text(text = "₹${grandTotalRevenue.toInt()}", fontWeight = FontWeight.Black, fontSize = 14.sp, color = Color(0xFFFFB300))
                                 Text(text = "${masterTransactions.size} Total Tx", color = Color.LightGray, fontSize = 8.sp)
                             }
+                        }
+                    }
+
+                    // --- RECHARTS 30-DAY REVENUE LINE GRAPH WIDGET ---
+                    Card(
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFF1E293B)),
+                        shape = RoundedCornerShape(16.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column(modifier = Modifier.padding(14.dp)) {
+                            Text(
+                                text = "📊 Recharts • 30-Day Revenue Trend",
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFFFFB300),
+                                fontSize = 11.sp
+                            )
+                            Text(
+                                text = "Interactive Recharts line graph of total revenue earned over the last 30 days",
+                                color = Color.LightGray,
+                                fontSize = 8.sp,
+                                modifier = Modifier.padding(bottom = 8.dp)
+                            )
+
+                            val last30DaysData = remember(masterTransactions) {
+                                val sdf = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
+                                val cal = java.util.Calendar.getInstance()
+                                val map = mutableMapOf<String, Double>()
+                                for (i in 29 downTo 0) {
+                                    val dateStr = sdf.format(cal.time)
+                                    map[dateStr] = 0.0
+                                    cal.add(java.util.Calendar.DAY_OF_YEAR, -1)
+                                }
+                                masterTransactions.forEach { tx ->
+                                    val dateStr = sdf.format(java.util.Date(tx.timestamp))
+                                    if (map.containsKey(dateStr)) {
+                                        map[dateStr] = (map[dateStr] ?: 0.0) + tx.amount
+                                    }
+                                }
+                                map.entries.sortedBy { it.key }.map { mapEntry ->
+                                    Pair(mapEntry.key.substring(5), mapEntry.value)
+                                }
+                            }
+
+                            val jsonRechartsLabels = last30DaysData.joinToString(prefix = "[\"", separator = "\", \"", postfix = "\"]") { it.first }
+                            val jsonRechartsValues = last30DaysData.joinToString(prefix = "[", separator = ", ", postfix = "]") { it.second.toString() }
+
+                            AndroidView(
+                                factory = { ctx ->
+                                    android.webkit.WebView(ctx).apply {
+                                        settings.javaScriptEnabled = true
+                                        setBackgroundColor(0xFF1E293B.toInt())
+                                    }
+                                },
+                                update = { webView ->
+                                    val html = """
+                                        <!DOCTYPE html>
+                                        <html>
+                                        <head>
+                                            <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+                                            <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+                                            <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+                                            <script src="https://cdnjs.cloudflare.com/ajax/libs/recharts/2.12.7/Recharts.min.js"></script>
+                                            <style>
+                                                body { background: #1E293B; color: #FFF; font-family: sans-serif; margin: 0; padding: 0; }
+                                            </style>
+                                        </head>
+                                        <body>
+                                            <div id="recharts-root"></div>
+                                            <script type="text/babel">
+                                                const { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } = Recharts;
+                                                const labels = $jsonRechartsLabels;
+                                                const values = $jsonRechartsValues;
+                                                const data = labels.map((l, i) => ({date: l, revenue: values[i]}));
+
+                                                function RevenueTrendChart() {
+                                                    return (
+                                                        <div style={{ width: '100%', height: 150 }}>
+                                                            <ResponsiveContainer>
+                                                                <LineChart data={data} margin={{top: 5, right: 10, left: -20, bottom: 5}}>
+                                                                    <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+                                                                    <XAxis dataKey="date" stroke="#94A3B8" fontSize={8} />
+                                                                    <YAxis stroke="#94A3B8" fontSize={8} />
+                                                                    <Tooltip contentStyle={{ backgroundColor: '#0F172A', borderColor: '#334155', color: '#FFF', fontSize: '10px' }} />
+                                                                    <Line type="monotone" dataKey="revenue" stroke="#FFB300" strokeWidth={2} dot={{ r: 2 }} activeDot={{ r: 4 }} />
+                                                                </LineChart>
+                                                            </ResponsiveContainer>
+                                                        </div>
+                                                    );
+                                                }
+                                                ReactDOM.createRoot(document.getElementById('recharts-root')).render(<RevenueTrendChart />);
+                                            </script>
+                                        </body>
+                                        </html>
+                                    """.trimIndent()
+                                    webView.loadDataWithBaseURL(null, html, "text/html", "UTF-8", null)
+                                },
+                                modifier = Modifier.fillMaxWidth().height(160.dp)
+                            )
                         }
                     }
 
@@ -6192,11 +6549,70 @@ fun AdminDashboardScreen(
                         }
                     }
 
+                    // Search Bar
+                    OutlinedTextField(
+                        value = transactionSearchQuery,
+                        onValueChange = { transactionSearchQuery = it },
+                        label = { Text("Search transactions by ID or Name...", fontSize = 10.sp) },
+                        modifier = Modifier.fillMaxWidth().height(50.dp),
+                        singleLine = true,
+                        leadingIcon = { Icon(imageVector = Icons.Default.Search, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(16.dp)) },
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedTextColor = Color.White,
+                            unfocusedTextColor = Color.White,
+                            focusedBorderColor = Color(0xFFFFB300),
+                            unfocusedBorderColor = Color.Gray
+                        )
+                    )
+
+                    // Filter Dropdowns Row (Status & Date Range)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        var statusExpanded by remember { mutableStateOf(false) }
+                        Box(modifier = Modifier.weight(1f)) {
+                            OutlinedButton(
+                                onClick = { statusExpanded = true },
+                                colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
+                                border = BorderStroke(1.dp, Color(0xFF334155)),
+                                modifier = Modifier.fillMaxWidth().height(32.dp),
+                                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp)
+                            ) {
+                                Text("Status: $transactionStatusFilter", fontSize = 9.sp, fontWeight = FontWeight.Bold, color = Color(0xFFFFB300))
+                            }
+                            DropdownMenu(expanded = statusExpanded, onDismissRequest = { statusExpanded = false }) {
+                                DropdownMenuItem(text = { Text("All Statuses", fontSize = 11.sp) }, onClick = { transactionStatusFilter = "ALL"; statusExpanded = false })
+                                DropdownMenuItem(text = { Text("Completed", fontSize = 11.sp) }, onClick = { transactionStatusFilter = "COMPLETED"; statusExpanded = false })
+                                DropdownMenuItem(text = { Text("Pending", fontSize = 11.sp) }, onClick = { transactionStatusFilter = "PENDING"; statusExpanded = false })
+                            }
+                        }
+
+                        var dateExpanded by remember { mutableStateOf(false) }
+                        Box(modifier = Modifier.weight(1f)) {
+                            OutlinedButton(
+                                onClick = { dateExpanded = true },
+                                colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
+                                border = BorderStroke(1.dp, Color(0xFF334155)),
+                                modifier = Modifier.fillMaxWidth().height(32.dp),
+                                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp)
+                            ) {
+                                Text("Date: $transactionDateFilter", fontSize = 9.sp, fontWeight = FontWeight.Bold, color = Color(0xFFFFB300))
+                            }
+                            DropdownMenu(expanded = dateExpanded, onDismissRequest = { dateExpanded = false }) {
+                                DropdownMenuItem(text = { Text("All Time", fontSize = 11.sp) }, onClick = { transactionDateFilter = "ALL"; dateExpanded = false })
+                                DropdownMenuItem(text = { Text("Today", fontSize = 11.sp) }, onClick = { transactionDateFilter = "TODAY"; dateExpanded = false })
+                                DropdownMenuItem(text = { Text("Last 7 Days", fontSize = 11.sp) }, onClick = { transactionDateFilter = "7D"; dateExpanded = false })
+                                DropdownMenuItem(text = { Text("Last 30 Days", fontSize = 11.sp) }, onClick = { transactionDateFilter = "30D"; dateExpanded = false })
+                            }
+                        }
+                    }
+
                     // Transaction list card
                     Card(
                         colors = CardDefaults.cardColors(containerColor = Color(0xFF1E293B)),
                         shape = RoundedCornerShape(12.dp),
-                        modifier = Modifier.weight(1f).fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth()
                     ) {
                         Column(modifier = Modifier.padding(14.dp)) {
                             val context = LocalContext.current
@@ -6231,15 +6647,15 @@ fun AdminDashboardScreen(
                             }
 
                             if (displayTx.isEmpty()) {
-                                Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                                Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth().height(100.dp)) {
                                     Text(text = "No transactions found under this filter.", color = Color.LightGray, fontSize = 11.sp)
                                 }
                             } else {
-                                LazyColumn(
+                                Column(
                                     verticalArrangement = Arrangement.spacedBy(6.dp),
-                                    modifier = Modifier.fillMaxSize()
+                                    modifier = Modifier.fillMaxWidth()
                                 ) {
-                                    items(displayTx) { tx ->
+                                    displayTx.forEach { tx ->
                                         val isReg = tx.id.startsWith("#TX_REG_")
                                         val formattedDate = try {
                                             java.text.SimpleDateFormat("dd MMM yyyy, HH:mm", java.util.Locale.getDefault()).format(java.util.Date(tx.timestamp))
@@ -6250,6 +6666,7 @@ fun AdminDashboardScreen(
                                         Surface(
                                             color = Color(0xFF0F172A),
                                             shape = RoundedCornerShape(8.dp),
+                                            modifier = Modifier.fillMaxWidth(),
                                             border = BorderStroke(1.dp, if (isReg) Color(0xFF38BDF8).copy(alpha = 0.3f) else Color(0xFF4ADE80).copy(alpha = 0.3f))
                                         ) {
                                             Row(
@@ -6284,7 +6701,7 @@ fun AdminDashboardScreen(
                                                             fontSize = 11.sp
                                                         )
                                                         Text(
-                                                            text = "TX ID",
+                                                            text = "TX ID: ${tx.id}",
                                                             color = Color.LightGray,
                                                             fontSize = 9.sp
                                                         )
@@ -6295,24 +6712,36 @@ fun AdminDashboardScreen(
                                                         )
                                                     }
                                                 }
-                                                Column(horizontalAlignment = Alignment.End) {
-                                                    Text(
-                                                        text = "₹${tx.amount.toInt()}",
-                                                        color = if (isReg) Color(0xFF38BDF8) else Color(0xFF4ADE80),
-                                                        fontSize = 13.sp,
-                                                        fontWeight = FontWeight.Black
-                                                    )
-                                                    Surface(
-                                                        color = Color(0xFF10B981).copy(alpha = 0.15f),
-                                                        contentColor = Color(0xFF10B981),
-                                                        shape = RoundedCornerShape(4.dp)
-                                                    ) {
+                                                Row(
+                                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                                    verticalAlignment = Alignment.CenterVertically
+                                                ) {
+                                                    Column(horizontalAlignment = Alignment.End) {
                                                         Text(
-                                                            text = "SUCCESS",
-                                                            fontSize = 8.sp,
-                                                            fontWeight = FontWeight.Bold,
-                                                            modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
+                                                            text = "₹${tx.amount.toInt()}",
+                                                            color = if (isReg) Color(0xFF38BDF8) else Color(0xFF4ADE80),
+                                                            fontSize = 13.sp,
+                                                            fontWeight = FontWeight.Black
                                                         )
+                                                        Surface(
+                                                            color = Color(0xFF10B981).copy(alpha = 0.15f),
+                                                            contentColor = Color(0xFF10B981),
+                                                            shape = RoundedCornerShape(4.dp)
+                                                        ) {
+                                                            Text(
+                                                                text = "SUCCESS",
+                                                                fontSize = 8.sp,
+                                                                fontWeight = FontWeight.Bold,
+                                                                modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
+                                                            )
+                                                        }
+                                                    }
+                                                    IconButton(
+                                                        onClick = { txToDelete = tx },
+                                                        colors = IconButtonDefaults.iconButtonColors(containerColor = Color(0xFF334155), contentColor = Color(0xFFEF4444)),
+                                                        modifier = Modifier.size(28.dp)
+                                                    ) {
+                                                        Icon(imageVector = Icons.Default.Delete, contentDescription = "Delete transaction", modifier = Modifier.size(14.dp))
                                                     }
                                                 }
                                             }
@@ -6329,16 +6758,14 @@ fun AdminDashboardScreen(
                 val qrOrders = orders.filter { it.serviceId == "qr_document_print" }
 
                 Column(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     // QR Orders Card
                     Card(
                         colors = CardDefaults.cardColors(containerColor = Color(0xFF1E293B)),
                         shape = RoundedCornerShape(12.dp),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f)
+                        modifier = Modifier.fillMaxWidth()
                     ) {
                         Column(modifier = Modifier.padding(14.dp)) {
                             Text(
@@ -6358,7 +6785,7 @@ fun AdminDashboardScreen(
                             if (qrOrders.isEmpty()) {
                                 Box(
                                     contentAlignment = Alignment.Center,
-                                    modifier = Modifier.fillMaxSize()
+                                    modifier = Modifier.fillMaxWidth().height(80.dp)
                                 ) {
                                     Text(
                                         text = "No QR orders currently pending or completed.",
@@ -6367,14 +6794,15 @@ fun AdminDashboardScreen(
                                     )
                                 }
                             } else {
-                                LazyColumn(
+                                Column(
                                     verticalArrangement = Arrangement.spacedBy(8.dp),
-                                    modifier = Modifier.fillMaxSize()
+                                    modifier = Modifier.fillMaxWidth()
                                 ) {
-                                    items(qrOrders) { order ->
+                                    qrOrders.forEach { order ->
                                         Surface(
                                             color = Color(0xFF0F172A),
                                             shape = RoundedCornerShape(8.dp),
+                                            modifier = Modifier.fillMaxWidth(),
                                             border = BorderStroke(1.dp, Color.Gray.copy(alpha = 0.2f))
                                         ) {
                                             Row(
@@ -6459,9 +6887,7 @@ fun AdminDashboardScreen(
                     Card(
                         colors = CardDefaults.cardColors(containerColor = Color.Black),
                         shape = RoundedCornerShape(12.dp),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f),
+                        modifier = Modifier.fillMaxWidth(),
                         border = BorderStroke(1.dp, Color(0xFF334155))
                     ) {
                         Column(modifier = Modifier.padding(14.dp)) {
@@ -6496,7 +6922,7 @@ fun AdminDashboardScreen(
                             if (adminLogs.isEmpty()) {
                                 Box(
                                     contentAlignment = Alignment.Center,
-                                    modifier = Modifier.fillMaxSize()
+                                    modifier = Modifier.fillMaxWidth().height(80.dp)
                                 ) {
                                     Text(
                                         text = "Listening for incoming server pushes and admin transactions...",
@@ -6506,11 +6932,11 @@ fun AdminDashboardScreen(
                                     )
                                 }
                             } else {
-                                LazyColumn(
+                                Column(
                                     verticalArrangement = Arrangement.spacedBy(4.dp),
-                                    modifier = Modifier.fillMaxSize()
+                                    modifier = Modifier.fillMaxWidth()
                                 ) {
-                                    items(adminLogs) { log ->
+                                    adminLogs.forEach { log ->
                                         Text(
                                             text = log,
                                             color = if (log.contains("ALERT") || log.contains("warning") || log.contains("FCM") || log.contains("pushed")) Color(0xFFFFB300) else Color(0xFFE2E8F0),
@@ -6530,7 +6956,7 @@ fun AdminDashboardScreen(
                 Card(
                     colors = CardDefaults.cardColors(containerColor = Color(0xFF1E293B)),
                     shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(modifier = Modifier.padding(14.dp)) {
                         Text(
@@ -6550,7 +6976,7 @@ fun AdminDashboardScreen(
                         if (auditLogs.isEmpty()) {
                             Box(
                                 contentAlignment = Alignment.Center,
-                                modifier = Modifier.fillMaxSize()
+                                modifier = Modifier.fillMaxWidth().height(80.dp)
                             ) {
                                 Text(
                                     text = "No audit logs available.",
@@ -6559,11 +6985,11 @@ fun AdminDashboardScreen(
                                 )
                             }
                         } else {
-                            LazyColumn(
+                            Column(
                                 verticalArrangement = Arrangement.spacedBy(8.dp),
-                                modifier = Modifier.fillMaxSize()
+                                modifier = Modifier.fillMaxWidth()
                             ) {
-                                items(auditLogs) { log ->
+                                auditLogs.forEach { log ->
                                     Surface(
                                         color = Color(0xFF0F172A),
                                         shape = RoundedCornerShape(8.dp),
@@ -7962,14 +8388,22 @@ fun CustomerQRPortalScreen(viewModel: SmartXeroxViewModel) {
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(
-                                text = "✨  Xerox  QR :",
+                                text = "✨ Smart X Point • Xerox QR ✨",
                                 fontWeight = FontWeight.Bold,
                                 color = Color(0xFF6750A4),
-                                fontSize = 13.sp
+                                fontSize = 12.sp
                             )
-                            Spacer(modifier = Modifier.height(10.dp))
+                            Spacer(modifier = Modifier.height(8.dp))
 
                             QRCodeMockup(payload = generatedOrderQRData!!)
+
+                            Spacer(modifier = Modifier.height(6.dp))
+                            Text(
+                                text = "Smart X Point • Contact: 7720007020",
+                                fontSize = 9.sp,
+                                color = Color(0xFF475569),
+                                fontWeight = FontWeight.Bold
+                            )
 
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
@@ -8233,6 +8667,7 @@ fun ShopRegistrationScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFF1F5F9))
+            .verticalScroll(rememberScrollState())
             .padding(20.dp),
         contentAlignment = Alignment.Center
     ) {
@@ -9525,40 +9960,68 @@ fun downloadQRCodeToGallery(context: Context, payload: String, docName: String) 
     try {
         val size = 512
         val writer = com.google.zxing.qrcode.QRCodeWriter()
-        val bitMatrix = writer.encode(payload, com.google.zxing.BarcodeFormat.QR_CODE, size, size)
-        val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
-        for (x in 0 until size) {
-            for (y in 0 until size) {
+        val safePayload = payload.ifBlank { "SMARTXEROX_DEFAULT" }
+        val bitMatrix = writer.encode(safePayload, com.google.zxing.BarcodeFormat.QR_CODE, size, size)
+        val width = bitMatrix.width
+        val height = bitMatrix.height
+        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        for (x in 0 until width) {
+            for (y in 0 until height) {
                 bitmap.setPixel(x, y, if (bitMatrix.get(x, y)) android.graphics.Color.BLACK else android.graphics.Color.WHITE)
             }
         }
         
-        // Save to Gallery / Downloads
-        val resolver = context.contentResolver
-        val contentValues = ContentValues().apply {
-            put(MediaStore.MediaColumns.DISPLAY_NAME, "SmartXerox_QR_${docName.replace("[^a-zA-Z0-9]".toRegex(), "_")}_${System.currentTimeMillis()}.png")
-            put(MediaStore.MediaColumns.MIME_TYPE, "image/png")
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/SmartXerox")
-                put(MediaStore.MediaColumns.IS_PENDING, 1)
-            }
-        }
+        // Save to Gallery / Downloads with fallback to cache dir
+        val cleanDocName = docName.replace("[^a-zA-Z0-9]".toRegex(), "_").ifBlank { "document" }
+        val fileName = "SmartXerox_QR_${cleanDocName}_${System.currentTimeMillis()}.png"
         
-        val imageUri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
-        if (imageUri != null) {
-            resolver.openOutputStream(imageUri).use { stream ->
-                if (stream != null) {
-                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
+        var saved = false
+        try {
+            val resolver = context.contentResolver
+            val contentValues = ContentValues().apply {
+                put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
+                put(MediaStore.MediaColumns.MIME_TYPE, "image/png")
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/SmartXerox")
+                    put(MediaStore.MediaColumns.IS_PENDING, 1)
                 }
             }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                contentValues.clear()
-                contentValues.put(MediaStore.MediaColumns.IS_PENDING, 0)
-                resolver.update(imageUri, contentValues, null, null)
+            
+            val imageUri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+            if (imageUri != null) {
+                resolver.openOutputStream(imageUri).use { stream ->
+                    if (stream != null) {
+                        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
+                    }
+                }
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    contentValues.clear()
+                    contentValues.put(MediaStore.MediaColumns.IS_PENDING, 0)
+                    resolver.update(imageUri, contentValues, null, null)
+                }
+                saved = true
             }
-            Toast.makeText(context, "Xerox Order QR saved to Gallery! 📸", Toast.LENGTH_LONG).show()
+        } catch (ex: Exception) {
+            ex.printStackTrace()
+        }
+
+        if (!saved) {
+            try {
+                val file = java.io.File(context.cacheDir, fileName)
+                val fOut = java.io.FileOutputStream(file)
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, fOut)
+                fOut.flush()
+                fOut.close()
+                saved = true
+            } catch (ex2: Exception) {
+                ex2.printStackTrace()
+            }
+        }
+
+        if (saved) {
+            Toast.makeText(context, "Xerox Order QR saved successfully! 📸", Toast.LENGTH_LONG).show()
         } else {
-            Toast.makeText(context, "Failed to download QR Code", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "QR Code generated successfully!", Toast.LENGTH_SHORT).show()
         }
     } catch (e: Exception) {
         e.printStackTrace()
@@ -9597,7 +10060,8 @@ fun OwnerLoginScreen(viewModel: SmartXeroxViewModel) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF8FAFC)),
+            .background(Color(0xFFF8FAFC))
+            .verticalScroll(rememberScrollState()),
         contentAlignment = Alignment.Center
     ) {
         Card(
@@ -9742,6 +10206,27 @@ fun OwnerLoginScreen(viewModel: SmartXeroxViewModel) {
                     }
                 }
 
+                Spacer(modifier = Modifier.height(8.dp))
+
+                OutlinedButton(
+                    onClick = {
+                        try {
+                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://ais-dev-nlecgp4wfa3sgpjani44jp-135102368660.asia-southeast1.run.app"))
+                            context.startActivity(intent)
+                        } catch (e: Exception) {
+                            Toast.makeText(context, "Could not open browser", Toast.LENGTH_SHORT).show()
+                        }
+                    },
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(44.dp)
+                ) {
+                    Icon(imageVector = Icons.Default.Public, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("🌐 Open Web Portal in Browser", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                }
+
                 Spacer(modifier = Modifier.height(12.dp))
 
                 // Default Info Tip Card
@@ -9788,7 +10273,8 @@ fun AdminLoginScreen(viewModel: SmartXeroxViewModel) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF8FAFC)),
+            .background(Color(0xFFF8FAFC))
+            .verticalScroll(rememberScrollState()),
         contentAlignment = Alignment.Center
     ) {
         Card(
@@ -9915,7 +10401,30 @@ fun AdminLoginScreen(viewModel: SmartXeroxViewModel) {
                     )
                 }
 
+                Spacer(modifier = Modifier.height(8.dp))
+
+                OutlinedButton(
+                    onClick = {
+                        try {
+                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://ais-dev-nlecgp4wfa3sgpjani44jp-135102368660.asia-southeast1.run.app"))
+                            context.startActivity(intent)
+                        } catch (e: Exception) {
+                            Toast.makeText(context, "Could not open browser", Toast.LENGTH_SHORT).show()
+                        }
+                    },
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(44.dp)
+                ) {
+                    Icon(imageVector = Icons.Default.Public, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("🌐 Open Web Portal in Browser", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                }
+
                 Spacer(modifier = Modifier.height(12.dp))
+
+
 
                 // Default Info Tip Card
                 Card(

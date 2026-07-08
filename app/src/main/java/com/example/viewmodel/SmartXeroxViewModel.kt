@@ -1056,6 +1056,18 @@ class SmartXeroxViewModel(application: Application) : AndroidViewModel(applicati
         }
     }
 
+    fun deleteTransaction(txId: String) {
+        viewModelScope.launch {
+            repository.deleteTransaction(txId)
+            firestore?.collection("transactions")?.document(txId)?.delete()
+                ?.addOnSuccessListener {
+                    addAdminLog("🗑️ Firestore: Transaction $txId deleted from Cloud.")
+                }
+            addAdminLog("🗑️ Admin deleted transaction $txId (Mistake / Bug correction).")
+            addHeartbeatLog("🗑️ Transaction $txId removed by admin.")
+        }
+    }
+
     fun updateCustomLogoUri(context: Context, uri: Uri) {
         viewModelScope.launch {
             try {
@@ -2014,6 +2026,25 @@ class SmartXeroxViewModel(application: Application) : AndroidViewModel(applicati
         }
     }
 
+    fun resetOwnerRegistration(onResult: (Boolean) -> Unit) {
+        viewModelScope.launch {
+            val current = database.dao().getOwnerCreditsDirect() ?: OwnerCredits()
+            val updated = current.copy(
+                isRegistered = false,
+                registrationDate = 0L,
+                subscriptionExpires = 0L,
+                subscriptionStatus = "INACTIVE",
+                ownerUpi = "owner@upi",
+                ownerUsername = "owner",
+                ownerPassword = "owner123"
+            )
+            repository.updateOwnerCredits(updated)
+            syncOwnerProfileToFirestore()
+            addAdminLog("⚠️ Admin deleted / reset shop owner registration (Unpaid / Mistake Correction).")
+            addHeartbeatLog("⚠️ Shop registration deleted by admin. Please register again with valid payment.")
+            onResult(true)
+        }
+    }
     fun resetAdminPassword(masterUpiInput: String, newPass: String, onResult: (Boolean) -> Unit) {
         viewModelScope.launch {
             val adminSettings = database.dao().getAdminSettingsDirect() ?: AdminSettings()

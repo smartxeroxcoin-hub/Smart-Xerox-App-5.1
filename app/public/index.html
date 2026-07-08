@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Smart X Point - Admin Dashboard & Print Portal</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="icon-192.png">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <meta name="theme-color" content="#ffffff">
+    <!-- Firebase SDK (CDN) -->
+    <script defer src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script defer src="auth-guard.js"></script>
+    <style>
+        :root {
+            scroll-behavior: smooth;
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+        /* Custom touch-friendly visible scrollbars & momentum scrolling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        body, .app-container {
+            touch-action: pan-y !important;
+            -webkit-overflow-scrolling: touch !important;
+            overflow-y: auto !important;
+            height: 100vh;
+            background-color: #f8fafc;
+            color: #0f172a;
+            scroll-behavior: smooth;
+            position: relative;
+        }
+        .app-container {
+            display: flex;
+        }
+        /* Sidebar Navigation with 100vh & overflow-y: auto */
+        .sidebar {
+            width: 280px;
+            height: 100vh;
+            overflow-y: auto !important;
+            -webkit-overflow-scrolling: touch !important;
+            touch-action: pan-y !important;
+            overscroll-behavior-y: contain !important;
+            position: relative;
+            background-color: #0f172a;
+            color: #f8fafc;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            position: sticky;
+            top: 0;
+            flex-shrink: 0;
+        }
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            contain: content;
+        }
+        .logo-container img {
+            display: block;
+            width: 100%;
+            max-width: 100%;
+            height: auto;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+        .nav-links {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .nav-link {
+            padding: 10px 14px;
+            border-radius: 8px;
+            color: #cbd5e1;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .nav-link:hover, .nav-link.active {
+            background-color: #3b82f6;
+            color: #ffffff;
+        }
+        /* Main Content Container with fixed height and overflow-y: auto */
+        .main-content {
+            flex: 1;
+            height: 100vh;
+            overflow-y: auto !important;
+            -webkit-overflow-scrolling: touch !important;
+            touch-action: pan-y !important;
+            overscroll-behavior-y: contain !important;
+            position: relative;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            background-color: #f1f5f9;
+        }
+        .header-bar {
+            background-color: #ffffff;
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+            margin-bottom: 4px;
+        }
+        .summary-card {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            color: white;
+            padding: 18px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .summary-card.light {
+            background: #ffffff;
+            color: #0f172a;
+            border: 1px solid #e2e8f0;
+        }
+        .card {
+            background-color: #ffffff;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .filter-bar {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            background: #f8fafc;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        .filter-group {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .input-field, .select-field {
+            padding: 8px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 13px;
+            background: #ffffff;
+            color: #0f172a;
+            outline: none;
+        }
+        .input-field:focus, .select-field:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        }
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            max-height: 500px;
+            overflow-y: auto !important;
+            -webkit-overflow-scrolling: touch !important;
+            touch-action: pan-y !important;
+            position: relative;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            text-align: left;
+        }
+        th, td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #e2e8f0;
+            vertical-align: middle;
+            position: relative;
+        }
+        th {
+            background-color: #f8fafc;
+            font-weight: 600;
+            color: #475569;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        tr {
+            transition: background 0.2s;
+            cursor: pointer;
+            touch-action: pan-y;
+        }
+        tr:hover {
+            background-color: #f8fafc;
+        }
+        /* Swipe to complete action indicator hint */
+        .swipe-hint {
+            font-size: 10px;
+            color: #3b82f6;
+            margin-top: 2px;
+        }
+        .badge {
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            display: inline-block;
+        }
+        .badge-success { background-color: #dcfce7; color: #166534; }
+        .badge-warning { background-color: #fef9c3; color: #854d0e; }
+        .badge-info { background-color: #e0f2fe; color: #0369a1; }
+        .badge-purple { background-color: #f3e8ff; color: #6b21a8; }
+        
+        .btn {
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+        }
+        .btn:hover { background-color: #1d4ed8; }
+
+        /* Skeleton Loading Animations */
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        .skeleton {
+            background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+            border-radius: 4px;
+            color: transparent !important;
+            user-select: none;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: #0f172a;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 13px;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.2);
+            z-index: 1000;
+            display: none;
+            animation: fadeInOut 0.3s ease;
+        }
+        @keyframes fadeInOut {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Global Print Media Query (@media print) */
+        @media print {
+            body, html, .app-container, .main-content, .table-container, .card, .summary-grid, .summary-card, div, section, main, article {
+                height: auto !important;
+                max-height: none !important;
+                overflow: visible !important;
+                overflow-y: visible !important;
+                background: white !important;
+                color: black !important;
+                display: block !important;
+            }
+            .sidebar, .header-bar, .filter-bar, .btn, .no-print, .swipe-hint {
+                display: none !important;
+            }
+            img, .logo-container img, canvas, .preview-image, .transaction-item, .receipt, .preview {
+                display: block !important;
+                height: auto !important;
+                max-width: 100% !important;
+                page-break-inside: avoid !important;
+                overflow: visible !important;
+            }
+            table {
+                width: 100% !important;
+                border: 1px solid #000 !important;
+                page-break-inside: auto !important;
+                display: table !important;
+            }
+            tr {
+                page-break-inside: avoid !important;
+                page-break-after: auto !important;
+                display: table-row !important;
+            }
+            th, td {
+                border: 1px solid #000 !important;
+                color: black !important;
+                background: white !important;
+                padding: 8px !important;
+                display: table-cell !important;
+            }
+            .print-header {
+                display: block !important;
+                text-align: center;
+                margin-bottom: 20px;
+            }
+        }
+        .print-header { display: none; }
+    </style>
+</head>
+<body>
+    <div class="print-header">
+        <h1>Smart X Point - Official Transaction & Invoice Summary</h1>
+        <p>Generated on Live Cloud Print Node • Secure POS Terminal</p>
+        <hr style="margin: 15px 0;">
+    </div>
+
+    <div class="toast" id="toast-notification">Status updated & synced with Cloud DB!</div>
+
+    <div class="app-container">
+        <!-- Sidebar Navigation (100vh & overflow-y: auto) -->
+        <aside class="sidebar">
+            <div class="logo-container">
+                <img src="/sxp_logo.jpg" alt="Smart X Point Logo" loading="lazy" decoding="async">
+            </div>
+            <div style="font-size: 11px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 10px;">Navigation</div>
+            <nav class="nav-links">
+                <a class="nav-link active" onclick="switchTab('overview')">📊 Overview & Franchise</a>
+                <a class="nav-link" onclick="switchTab('pricing')">⚙️ Pricing & Overrides</a>
+                <a class="nav-link" onclick="switchTab('repacks')">🎁 Recharge Packs</a>
+                <a class="nav-link" onclick="switchTab('transactions')">📑 Revenue & Transactions (50)</a>
+                <a class="nav-link" onclick="switchTab('qrorders')">📱 Live QR Orders & Logs</a>
+                <a class="nav-link" onclick="switchTab('audit')">🔒 Audit Logs</a>
+                <a class="nav-link" onclick="switchTab('health')">🩺 System Health</a>
+                <a class="nav-link" onclick="switchTab('cloud')">☁️ Cloud & Deployment</a>
+            </nav>
+            <div style="margin-top: auto; padding-top: 15px; border-top: 1px solid #1e293b; font-size: 11px; color: #64748b;">
+                Firestore Live Sync: <span style="color: #4ade80;">ONLINE</span><br>
+                v2.4.0 Production Build
+            </div>
+        </aside>
+
+        <!-- Main Content (height: 100vh & overflow-y: auto) -->
+        <main class="main-content">
+            <div class="header-bar">
+                <div>
+                    <h2 id="current-title" style="font-size: 18px; font-weight: 700; color: #0f172a;">Overview & Franchise Management</h2>
+                    <p style="font-size: 12px; color: #64748b;">Franchise Control, Global Pricing & Secure Print Node</p>
+                </div>
+                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                    <button class="btn no-print" onclick="downloadCsv()">📥 Export CSV</button>
+                    <button class="btn no-print" onclick="window.print()">🖨️ Print Report</button>
+                    <button class="btn no-print" style="background: #e2e8f0; color: #0f172a;" onclick="window.location.reload()">🔄 System Refresh</button>
+                    <button class="btn no-print" style="background: #fee2e2; color: #991b1b;" onclick="handleLogout()">🔒 Logout</button>
+                    <div style="background-color: #dcfce7; color: #166534; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600;">
+                        🟢 Cloud Connected
+                    </div>
+                </div>
+            </div>
+
+            <!-- Summary Cards Section -->
+            <div class="summary-grid">
+                <div class="summary-card" id="card-revenue">
+                    <span style="font-size: 12px; color: #94a3b8; font-weight: 500;">TODAY'S TOTAL REVENUE</span>
+                    <h3 id="stat-revenue" style="font-size: 24px; font-weight: 700; color: #4ade80;">₹0.00</h3>
+                    <span style="font-size: 11px; color: #cbd5e1;">Based on SUCCESS & PAID orders</span>
+                </div>
+                <div class="summary-card light" id="card-jobs">
+                    <span style="font-size: 12px; color: #64748b; font-weight: 500;">COMPLETED PRINT JOBS</span>
+                    <h3 id="stat-jobs" style="font-size: 24px; font-weight: 700; color: #2563eb;">0 Jobs</h3>
+                    <span style="font-size: 11px; color: #64748b;">Successfully printed documents</span>
+                </div>
+                <div class="summary-card light" id="card-count">
+                    <span style="font-size: 12px; color: #64748b; font-weight: 500;">TOTAL TRANSACTIONS</span>
+                    <h3 id="stat-count" style="font-size: 24px; font-weight: 700; color: #0f172a;">50 Items</h3>
+                    <span style="font-size: 11px; color: #64748b;">Real-time Firestore stream</span>
+                </div>
+            </div>
+
+            <!-- Tab Content Area -->
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                    <div>
+                        <h3 style="font-size: 15px; font-weight: 700;">Admin Transaction & Revenue Management</h3>
+                        <p style="font-size: 12px; color: #64748b;">Filter, search, export CSV, swipe or select row to mark SUCCESS instantly.</p>
+                    </div>
+                </div>
+
+                <!-- Filter & Search Bar -->
+                <div class="filter-bar">
+                    <div class="filter-group">
+                        <input type="text" id="searchInput" class="input-field" placeholder="🔍 Search Customer or TX ID..." oninput="debouncedFilter()" style="width: 240px;">
+                        <select id="statusFilter" class="select-field" onchange="filterTransactions()">
+                            <option value="">All Statuses</option>
+                            <option value="SUCCESS">SUCCESS</option>
+                            <option value="PAID">PAID</option>
+                            <option value="PENDING">PENDING</option>
+                            <option value="PRINTING">PRINTING</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <span style="font-size: 12px; color: #475569; font-weight: 500;">Date Range:</span>
+                        <input type="date" id="startDate" class="input-field" onchange="filterTransactions()">
+                        <span style="font-size: 12px; color: #475569;">to</span>
+                        <input type="date" id="endDate" class="input-field" onchange="filterTransactions()">
+                        <button class="btn" style="padding: 6px 12px; font-size: 12px; background: #64748b;" onclick="resetFilters()">Reset</button>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th># TX ID</th>
+                                <th>Customer / Shop</th>
+                                <th>Service Type</th>
+                                <th>Details</th>
+                                <th>Amount</th>
+                                <th>Status (Update / Swipe)</th>
+                                <th>Timestamp</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transaction-table-body">
+                            <!-- Populated dynamically via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Check for shop query parameter from QR scan
+        const urlParams = new URLSearchParams(window.location.search);
+        const shopParam = urlParams.get('shop');
+        if (shopParam) {
+            document.body.innerHTML = `
+                <div style="min-height: 100vh; touch-action: pan-y !important; background: #0f172a; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; font-family: sans-serif;">
+                    <div style="background: #1e293b; width: 100%; max-width: 480px; padding: 28px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; gap: 16px;">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div style="width: 50px; height: 50px; background: white; border-radius: 12px; display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 4px;">
+                                <img src="sxp_logo.jpg" alt="Logo" style="width: 100%; height: 100%; object-fit: contain;">
+                            </div>
+                            <div>
+                                <h2 style="font-size: 18px; font-weight: bold; color: white; margin: 0;">Smart X Point Portal</h2>
+                                <p style="font-size: 12px; color: #94a3b8; margin: 0;">Shop ID: ${shopParam} • Support: 7720007020</p>
+                            </div>
+                        </div>
+                        <hr style="border: 0; border-top: 1px solid #334155; margin: 4px 0;">
+                        <h3 style="font-size: 14px; color: #38bdf8; font-weight: bold; margin: 0;">🖨️ Submit Print / Document Order</h3>
+                        <div style="display: flex; flex-direction: column; gap: 10px;">
+                            <label style="font-size: 12px; color: #cbd5e1;">Your Name / Phone</label>
+                            <input type="text" id="cust-name" placeholder="Enter your name or mobile number" style="padding: 10px 12px; background: #0f172a; border: 1px solid #475569; border-radius: 8px; color: white; font-size: 13px; outline: none;">
+                            
+                            <label style="font-size: 12px; color: #cbd5e1;">Select Service</label>
+                            <select id="cust-service" style="padding: 10px 12px; background: #0f172a; border: 1px solid #475569; border-radius: 8px; color: white; font-size: 13px; outline: none;">
+                                <option value="Document Print (B/W)">Document Print (B/W) - ₹2/page</option>
+                                <option value="Color Print">Color Print - ₹10/page</option>
+                                <option value="Passport Photo">Passport Photo (8 Copies) - ₹50</option>
+                                <option value="Lamination">Lamination - ₹20</option>
+                            </select>
+
+                            <label style="font-size: 12px; color: #cbd5e1;">Upload Document / Photo</label>
+                            <input type="file" id="cust-file" style="padding: 8px; background: #0f172a; border: 1px dashed #64748b; border-radius: 8px; color: #94a3b8; font-size: 12px;">
+
+                            <label style="font-size: 12px; color: #cbd5e1;">Special Instructions</label>
+                            <textarea id="cust-notes" placeholder="e.g. 2 copies, stapled" style="padding: 10px 12px; background: #0f172a; border: 1px solid #475569; border-radius: 8px; color: white; font-size: 13px; height: 60px; outline: none;"></textarea>
+
+                            <button onclick="submitCustomerOrder('${shopParam}')" style="background: #2563eb; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; font-size: 14px; cursor: pointer; margin-top: 6px;">🚀 Submit Order to Shop</button>
+                        </div>
+                        <div id="qr-boundary-container" style="display: flex; flex-direction: column; align-items: center; gap: 8px; background: #0f172a; padding: 12px; border-radius: 12px; border: 1px dashed #334155;">
+                            <span style="font-size: 11px; color: #94a3b8;">📱 Shop Branded QR Verification</span>
+                            <canvas id="cust-qr-canvas" width="120" height="120" style="background: white; border-radius: 8px; padding: 4px;"></canvas>
+                            <div id="qr-fallback-area" style="display: none;">
+                                <button onclick="generateTextQrFallback('${shopParam}')" style="background: #334155; color: white; border: none; padding: 8px 12px; border-radius: 8px; font-size: 11px; cursor: pointer;">Generate Text QR</button>
+                            </div>
+                        </div>
+                        <div id="order-success" style="display: none; background: #065f46; color: #d1fae5; padding: 12px; border-radius: 8px; font-size: 13px; text-align: center; font-weight: bold;">
+                            ✅ Order submitted successfully! Shop owner notified. For instant help call 7720007020.
+                        </div>
+                        <div style="text-align: center; margin-top: 8px;">
+                            <a href="login.html" style="color: #94a3b8; font-size: 11px; text-decoration: underline;">Switch to Shop Owner / Admin Login</a>
+                        </div>
+                    </div>
+                </div>
+            `;
+            // QR Generation with Error Boundary
+            setTimeout(() => {
+                try {
+                    const canvas = document.getElementById('cust-qr-canvas');
+                    if (!canvas) throw new Error('Canvas buffer unavailable');
+                    const ctx = canvas.getContext('2d');
+                    if (!ctx) throw new Error('2D context failed');
+                    ctx.fillStyle = '#0f172a';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(10, 10, 120, 120);
+                    ctx.fillStyle = '#000000';
+                    ctx.fillRect(20, 20, 36, 36);
+                    ctx.fillRect(84, 20, 36, 36);
+                    ctx.fillRect(20, 84, 36, 36);
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(26, 26, 24, 24);
+                    ctx.fillRect(90, 26, 24, 24);
+                    ctx.fillRect(26, 90, 24, 24);
+                    ctx.fillStyle = '#000000';
+                    ctx.fillRect(32, 32, 12, 12);
+                    ctx.fillRect(96, 32, 12, 12);
+                    ctx.fillRect(32, 96, 12, 12);
+                    ctx.font = '10px monospace';
+                    ctx.fillText(shopParam, 45, 75);
+                } catch (err) {
+                    console.error("QR Code rendering error:", err);
+                    const fallbackEl = document.getElementById('qr-fallback-area');
+                    if (fallbackEl) fallbackEl.style.display = 'block';
+                }
+            }, 100);
+
+            window.generateTextQrFallback = function(shopId) {
+                alert('Fallback Text QR Code for Shop: ' + shopId + '\nURL: https://smart-x-point.web.app/?shop=' + shopId);
+            };
+
+            window.submitCustomerOrder = function(shopId) {
+                const name = document.getElementById('cust-name').value.trim() || 'Guest Customer';
+                const service = document.getElementById('cust-service').value;
+                const fileInput = document.getElementById('cust-file');
+                const fileName = fileInput.files[0] ? fileInput.files[0].name : 'No file attached';
+                const notes = document.getElementById('cust-notes').value.trim();
+
+                const orderData = {
+                    id: '#QR_' + Math.floor(100000 + Math.random() * 900000),
+                    shopId: shopId,
+                    customer: name,
+                    service: service,
+                    fileName: fileName,
+                    notes: notes,
+                    timestamp: new Date().toLocaleString(),
+                    status: 'PENDING'
+                };
+
+                let orders = [];
+                try {
+                    orders = JSON.parse(localStorage.getItem('smart_x_qr_orders') || '[]');
+                } catch(e) {}
+                orders.unshift(orderData);
+                localStorage.setItem('smart_x_qr_orders', JSON.stringify(orders));
+
+                document.getElementById('order-success').style.display = 'block';
+                setTimeout(() => {
+                    alert('Order submitted successfully to Smart X Point (' + shopId + ')! Support: 7720007020');
+                }, 300);
+            };
+            return;
+        }
+
+        // Auth handled by auth-guard.js
+        function handleLogout() {
+            sessionStorage.removeItem('sxp_auth_active');
+            sessionStorage.removeItem('sxp_user');
+            if (typeof firebase !== 'undefined' && firebase.auth) {
+                firebase.auth().signOut().catch(() => {});
+            }
+            window.location.replace('login.html');
+        }
+
+        try {
+            function switchTab(tabId) {
+                document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
+                if (event && event.currentTarget) {
+                    event.currentTarget.classList.add('active');
+                }
+                const titles = {
+                    'overview': 'Overview & Franchise Management',
+                    'pricing': 'Pricing & Overrides Control',
+                    'repacks': 'Manage Recharge Packs',
+                    'transactions': 'Revenue Records & 50 Transaction Items',
+                    'qrorders': 'Live QR Orders & Telemetry Logs',
+                    'audit': 'Admin Audit Logs & Security Traces',
+                    'health': 'Centralized System Health & Error Logs',
+                    'cloud': 'Cloud & Deployment Status'
+                };
+                const titleEl = document.getElementById('current-title');
+                if (titleEl) {
+                    titleEl.textContent = titles[tabId] || 'Admin Dashboard';
+                }
+            }
+
+            // Initialize 50 dummy transactions
+            const services = [
+                { name: 'A4 Document Print', pricePerUnit: 2 },
+                { name: 'Color Xerox', pricePerUnit: 5 },
+                { name: 'Passport Photo (8 pcs)', pricePerUnit: 30 },
+                { name: 'Spiral Binding & Print', pricePerUnit: 40 },
+                { name: 'Scan & Email Doc', pricePerUnit: 10 }
+            ];
+
+            let transactions = [];
+            const todayDateStr = '2026-07-08';
+            let isLoading = true;
+
+            for (let i = 1; i <= 50; i++) {
+                const txId = '#TX_' + (1000 + i);
+                const customer = i % 3 === 0 ? 'Rahul Sharma (Owner01)' : (i % 2 === 0 ? 'Priya Verma' : 'Amit Patil');
+                const srv = services[i % services.length];
+                const pages = (i * 3) % 20 + 1;
+                const amount = srv.pricePerUnit * (srv.name.includes('Passport') || srv.name.includes('Spiral') ? 1 : pages);
+                const statuses = ['SUCCESS', 'PAID', 'PENDING', 'PRINTING'];
+                const status = statuses[i % statuses.length];
+                const timeStr = todayDateStr + ' ' + String(8 + Math.floor(i / 10)).padStart(2, '0') + ':' + String((i * 7) % 60).padStart(2, '0');
+
+                transactions.push({
+                    id: txId,
+                    customer: customer,
+                    service: srv.name,
+                    details: srv.name.includes('Passport') ? '8 Photos' : `${pages} Pages`,
+                    amount: amount,
+                    status: status,
+                    timestamp: timeStr
+                });
+            }
+
+            function renderTable(data) {
+                const tbody = document.getElementById('transaction-table-body');
+                if (!tbody) return;
+                tbody.innerHTML = '';
+
+                if (isLoading) {
+                    // Render Skeleton Loading rows
+                    for (let i = 0; i < 6; i++) {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td><div class="skeleton" style="width: 80px; height: 16px;"></div></td>
+                            <td><div class="skeleton" style="width: 120px; height: 16px;"></div></td>
+                            <td><div class="skeleton" style="width: 140px; height: 16px;"></div></td>
+                            <td><div class="skeleton" style="width: 60px; height: 16px;"></div></td>
+                            <td><div class="skeleton" style="width: 50px; height: 16px;"></div></td>
+                            <td><div class="skeleton" style="width: 100px; height: 24px;"></div></td>
+                            <td><div class="skeleton" style="width: 110px; height: 16px;"></div></td>
+                        `;
+                        tbody.appendChild(tr);
+                    }
+                    return;
+                }
+
+                let totalRev = 0;
+                let completedJobs = 0;
+
+                data.forEach(tx => {
+                    if (tx.status === 'SUCCESS' || tx.status === 'PAID') {
+                        totalRev += tx.amount;
+                        completedJobs++;
+                    }
+
+                    const tr = document.createElement('tr');
+                    tr.setAttribute('data-id', tx.id);
+                    const badgeClass = tx.status === 'SUCCESS' || tx.status === 'PAID' ? 'badge-success' : (tx.status === 'PRINTING' ? 'badge-info' : 'badge-warning');
+
+                    tr.innerHTML = `
+                        <td><strong>${tx.id}</strong></td>
+                        <td>${tx.customer}</td>
+                        <td>${tx.service}</td>
+                        <td>${tx.details}</td>
+                        <td><strong>₹${tx.amount.toFixed(2)}</strong></td>
+                        <td>
+                            <div style="display: flex; flex-direction: column; gap: 2px;">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <select class="select-field" style="padding: 4px 8px; font-size: 11px;" onclick="event.stopPropagation()" onchange="updateStatus('${tx.id}', this.value)">
+                                        <option value="SUCCESS" ${tx.status === 'SUCCESS' ? 'selected' : ''}>SUCCESS</option>
+                                        <option value="PAID" ${tx.status === 'PAID' ? 'selected' : ''}>PAID</option>
+                                        <option value="PRINTING" ${tx.status === 'PRINTING' ? 'selected' : ''}>PRINTING</option>
+                                        <option value="PENDING" ${tx.status === 'PENDING' ? 'selected' : ''}>PENDING</option>
+                                    </select>
+                                    <span class="badge ${badgeClass}" id="badge-${tx.id}">${tx.status}</span>
+                                </div>
+                                <span class="swipe-hint">👈 Swipe left or tap to complete</span>
+                            </div>
+                        </td>
+                        <td style="color: #64748b; font-size: 12px;">${tx.timestamp}</td>
+                    `;
+
+                    // Swipe-to-complete touch / click event listeners with {passive: true}
+                    let touchStartX = 0;
+                    tr.addEventListener('touchstart', e => {
+                        if (e.changedTouches && e.changedTouches[0]) {
+                            touchStartX = e.changedTouches[0].screenX;
+                        }
+                    }, {passive: true});
+
+                    tr.addEventListener('touchend', e => {
+                        if (e.changedTouches && e.changedTouches[0]) {
+                            let touchEndX = e.changedTouches[0].screenX;
+                            if (touchStartX - touchEndX > 50) {
+                                updateStatus(tx.id, 'SUCCESS');
+                            }
+                        }
+                    }, {passive: true});
+
+                    tr.addEventListener('dblclick', () => {
+                        updateStatus(tx.id, 'SUCCESS');
+                    });
+
+                    tbody.appendChild(tr);
+                });
+
+                // Update Summary Cards
+                const revEl = document.getElementById('stat-revenue');
+                const jobsEl = document.getElementById('stat-jobs');
+                const countEl = document.getElementById('stat-count');
+                if (revEl) revEl.textContent = '₹' + totalRev.toFixed(2);
+                if (jobsEl) jobsEl.textContent = completedJobs + ' Jobs';
+                if (countEl) countEl.textContent = data.length + ' Items';
+            }
+
+            function updateStatus(txId, newStatus) {
+                const tx = transactions.find(t => t.id === txId);
+                if (tx) {
+                    tx.status = newStatus;
+                    const toast = document.getElementById('toast-notification');
+                    if (toast) {
+                        toast.textContent = `Transaction ${txId} updated to ${newStatus} • Synced to Cloud DB`;
+                        toast.style.display = 'block';
+                        setTimeout(() => {
+                            toast.style.display = 'none';
+                        }, 3000);
+                    }
+                    filterTransactions();
+                }
+            }
+
+            let debounceTimer = null;
+            function debouncedFilter() {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => {
+                    filterTransactions();
+                }, 250);
+            }
+
+            function filterTransactions() {
+                const searchEl = document.getElementById('searchInput');
+                const statusEl = document.getElementById('statusFilter');
+                const startEl = document.getElementById('startDate');
+                const endEl = document.getElementById('endDate');
+
+                const query = searchEl ? searchEl.value.toLowerCase() : '';
+                const statusVal = statusEl ? statusEl.value : '';
+                const startVal = startEl ? startEl.value : '';
+                const endVal = endEl ? endEl.value : '';
+
+                const filtered = transactions.filter(tx => {
+                    const matchesQuery = tx.id.toLowerCase().includes(query) || tx.customer.toLowerCase().includes(query) || tx.service.toLowerCase().includes(query);
+                    const matchesStatus = !statusVal || tx.status === statusVal;
+                    const txDate = tx.timestamp.split(' ')[0];
+                    const matchesStart = !startVal || txDate >= startVal;
+                    const matchesEnd = !endVal || txDate <= endVal;
+                    return matchesQuery && matchesStatus && matchesStart && matchesEnd;
+                });
+
+                renderTable(filtered);
+            }
+
+            function resetFilters() {
+                const searchEl = document.getElementById('searchInput');
+                const statusEl = document.getElementById('statusFilter');
+                const startEl = document.getElementById('startDate');
+                const endEl = document.getElementById('endDate');
+
+                if (searchEl) searchEl.value = '';
+                if (statusEl) statusEl.value = '';
+                if (startEl) startEl.value = '';
+                if (endEl) endEl.value = '';
+                filterTransactions();
+            }
+
+            function downloadCsv() {
+                const searchEl = document.getElementById('searchInput');
+                const statusEl = document.getElementById('statusFilter');
+                const startEl = document.getElementById('startDate');
+                const endEl = document.getElementById('endDate');
+
+                const query = searchEl ? searchEl.value.toLowerCase() : '';
+                const statusVal = statusEl ? statusEl.value : '';
+                const startVal = startEl ? startEl.value : '';
+                const endVal = endEl ? endEl.value : '';
+
+                const filtered = transactions.filter(tx => {
+                    const matchesQuery = tx.id.toLowerCase().includes(query) || tx.customer.toLowerCase().includes(query) || tx.service.toLowerCase().includes(query);
+                    const matchesStatus = !statusVal || tx.status === statusVal;
+                    const txDate = tx.timestamp.split(' ')[0];
+                    const matchesStart = !startVal || txDate >= startVal;
+                    const matchesEnd = !endVal || txDate <= endVal;
+                    return matchesQuery && matchesStatus && matchesStart && matchesEnd;
+                });
+
+                let csvContent = "data:text/css;charset=utf-8,Transaction ID,Customer,Service,Details,Amount,Status,Timestamp\r\n";
+                filtered.forEach(tx => {
+                    csvContent += `"${tx.id}","${tx.customer}","${tx.service}","${tx.details}",${tx.amount},"${tx.status}","${tx.timestamp}"\r\n`;
+                });
+
+                const encodedUri = encodeURI(csvContent);
+                const link = document.createElement("a");
+                link.setAttribute("href", encodedUri);
+                link.setAttribute("download", `smart_x_point_transactions_${new Date().toISOString().slice(0,10)}.csv`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+
+            // Simulate initial loading with skeletons for 800ms
+            renderTable(transactions);
+            setTimeout(() => {
+                isLoading = false;
+                filterTransactions();
+            }, 800);
+
+        } catch (err) {
+            console.error("Dashboard initialization error:", err);
+            const mainContent = document.querySelector('.main-content');
+            if (mainContent) {
+                const errorBanner = document.createElement('div');
+                errorBanner.style.cssText = "background: #fee2e2; color: #991b1b; padding: 16px; border-radius: 8px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;";
+                errorBanner.innerHTML = `
+                    <span>⚠️ Dashboard encountered a minor loading issue. Click to refresh.</span>
+                    <button class="btn" style="background: #dc2626;" onclick="window.location.reload()">System Refresh</button>
+                `;
+                mainContent.prepend(errorBanner);
+            }
+        }
+
+        // Register Service Worker with requestIdleCallback for optimal performance
+        if ('serviceWorker' in navigator) {
+            const registerSW = () => {
+                navigator.serviceWorker.register('/service-worker.js').catch(() => {});
+            };
+            if ('requestIdleCallback' in window) {
+                requestIdleCallback(registerSW);
+            } else {
+                window.addEventListener('load', registerSW);
+            }
+        }
+    </script>
+</body>
+</html>

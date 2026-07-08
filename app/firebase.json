@@ -1,0 +1,50 @@
+{
+  "hosting": {
+    "public": "public",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "/login.html",
+        "destination": "/login.html"
+      },
+      {
+        "source": "/404.html",
+        "destination": "/404.html"
+      },
+      {
+        "source": "/sxp_logo.jpg",
+        "destination": "/sxp_logo.jpg"
+      },
+      {
+        "source": "/icon-192.png",
+        "destination": "/icon-192.png"
+      },
+      {
+        "source": "/icon-512.png",
+        "destination": "/icon-512.png"
+      },
+      {
+        "source": "/manifest.json",
+        "destination": "/manifest.json"
+      },
+      {
+        "source": "/service-worker.js",
+        "destination": "/service-worker.js"
+      },
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  },
+  "firestore": {
+    "rules": "firestore.rules"
+  },
+  "storage": {
+    "rules": "storage.rules"
+  }
+}

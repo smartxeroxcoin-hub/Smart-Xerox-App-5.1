@@ -210,6 +210,9 @@ interface SmartXeroxDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTransaction(tx: Transaction)
 
+    @Query("DELETE FROM transactions WHERE id = :id")
+    suspend fun deleteTransaction(id: String)
+
     // New: Cloud Storage Batches
     @Query("SELECT * FROM cloud_storage_batches ORDER BY timestamp DESC")
     fun getAllCloudBatches(): Flow<List<CloudStorageBatch>>

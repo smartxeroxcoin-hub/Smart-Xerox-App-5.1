@@ -93,6 +93,10 @@ class SmartXeroxRepository(private val dao: SmartXeroxDao) {
         dao.insertTransaction(tx)
     }
 
+    suspend fun deleteTransaction(id: String) {
+        dao.deleteTransaction(id)
+    }
+
     suspend fun insertCloudBatch(batch: CloudStorageBatch) {
         dao.insertCloudBatch(batch)
     }
@@ -133,7 +137,7 @@ class SmartXeroxRepository(private val dao: SmartXeroxDao) {
         // Prepopulate service rates if empty
         val defaultRates = listOf(
             // Category: Document Services
-            ServiceRate("passport_photo_ai", "Passport Photo AI (Background White)", 30.0, "AI Services"),
+            ServiceRate("passport_photo_ai", "Passport Photo AI (Background White)", 50.0, "AI Services"),
             ServiceRate("id_card_xerox", "ID Card Xerox (Single Page Front & Back)", 5.0, "Document Services"),
             ServiceRate("a4_xerox_bw_single", "A4 Xerox Single-Side (B&W)", 2.0, "Document Services"),
             ServiceRate("a4_xerox_bw_double", "A4 Xerox Double-Side (B&W)", 3.0, "Document Services"),

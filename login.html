@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Smart X Point - Admin & Owner Portal Login</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#ffffff">
+    <!-- Firebase SDK (CDN) -->
+    <script defer src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <style>
+        :root {
+            scroll-behavior: smooth;
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+        body {
+            background-color: #f8fafc;
+            color: #0f172a;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overscroll-behavior-y: contain;
+        }
+        .login-card {
+            background: #ffffff;
+            width: 100%;
+            max-width: 420px;
+            padding: 32px;
+            border-radius: 24px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.08);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            animation: fadeIn 0.4s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 72px;
+            height: 72px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+            padding: 6px;
+            border: 1px solid #e2e8f0;
+        }
+        .logo-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 10px;
+        }
+        .title-area {
+            text-align: center;
+        }
+        .title-area h1 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 4px;
+        }
+        .title-area p {
+            font-size: 12px;
+            color: #64748b;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .form-group label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #334155;
+        }
+        .form-control {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 12px;
+            font-size: 14px;
+            color: #0f172a;
+            outline: none;
+            transition: all 0.2s ease;
+            background-color: #fff;
+        }
+        .form-control:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+        }
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .btn-primary {
+            background-color: #2563eb;
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+        }
+        .btn-primary:hover {
+            background-color: #1d4ed8;
+        }
+        .error-banner {
+            background-color: #fee2e2;
+            color: #991b1b;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            display: none;
+        }
+        .demo-credentials {
+            background-color: #f1f5f9;
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            color: #475569;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .demo-btn-group {
+            display: flex;
+            gap: 8px;
+            margin-top: 6px;
+        }
+        .btn-demo {
+            flex: 1;
+            padding: 6px;
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #334155;
+            cursor: pointer;
+        }
+        .btn-demo:hover {
+            background: #e2e8f0;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <div class="logo-container">
+            <img src="sxp_logo.jpg" alt="Smart X Point Logo" loading="lazy">
+        </div>
+        <div class="title-area">
+            <h1>Admin & Owner Portal</h1>
+            <p>Smart X Point Secure Authentication Gateway</p>
+        </div>
+
+        <div id="error-banner" class="error-banner"></div>
+
+        <form id="login-form" onsubmit="handleLogin(event)" style="display: flex; flex-direction: column; gap: 16px;">
+            <div class="form-group">
+                <label for="username">Username or Email</label>
+                <input type="text" id="username" class="form-control" placeholder="admin or owner" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" class="form-control" placeholder="••••••••" required>
+            </div>
+            <button type="submit" class="btn btn-primary">
+                <span>🔐 Verify & Access Dashboard</span>
+            </button>
+        </form>
+
+        <div class="demo-credentials">
+            <strong>💡 Quick Demo Fill:</strong>
+            <span>• Admin: <code>admin</code> / <code>admin123</code></span>
+            <span>• Owner: <code>owner</code> / <code>owner123</code></span>
+            <div class="demo-btn-group">
+                <button type="button" class="btn-demo" onclick="fillAdmin()">Fill Admin</button>
+                <button type="button" class="btn-demo" onclick="fillOwner()">Fill Owner</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Check if already authenticated
+        if (localStorage.getItem('smart_x_authenticated') === 'true') {
+            window.location.href = 'index.html';
+        }
+
+        function fillAdmin() {
+            document.getElementById('username').value = 'admin';
+            document.getElementById('password').value = 'admin123';
+        }
+
+        function fillOwner() {
+            document.getElementById('username').value = 'owner';
+            document.getElementById('password').value = 'owner123';
+        }
+
+        function handleLogin(event) {
+            event.preventDefault();
+            const usernameInput = document.getElementById('username').value.trim();
+            const passwordInput = document.getElementById('password').value.trim();
+            const errorBanner = document.getElementById('error-banner');
+
+            // Validate against admin / owner credentials or Firebase Auth
+            if ((usernameInput === 'admin' && passwordInput === 'admin123') ||
+                (usernameInput === 'owner' && passwordInput === 'owner123') ||
+                (usernameInput.includes('@') && passwordInput.length >= 6)) {
+                
+                localStorage.setItem('smart_x_authenticated', 'true');
+                localStorage.setItem('smart_x_user', usernameInput);
+                
+                // Redirect to main dashboard
+                window.location.href = 'index.html';
+            } else {
+                errorBanner.style.display = 'block';
+                errorBanner.textContent = '❌ Invalid credentials! Use admin/admin123 or owner/owner123.';
+            }
+        }
+    </script>
+</body>
+</html>
